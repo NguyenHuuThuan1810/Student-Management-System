@@ -1,3 +1,70 @@
 <h1>Student Dashboard</h1>
 
 <a href="/logout">Logout</a>
+<hr>
+<h3>--- KHU VỰC TEST MODULE ENROLLMENT (ĐĂNG KÝ HỌC PHẦN) ---</h3>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      {% if category == 'success' %}
+        <div style="color: green; font-weight: bold;">{{ message }}</div>
+      {% else %}
+        <div style="color: red; font-weight: bold;">{{ message }}</div>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<fieldset style="margin-bottom: 20px; padding: 15px;">
+    <legend><b>Test: Đăng ký học phần mới</b></legend>
+    <form action="/enroll/add" method="POST">
+        <label>Mã số Sinh viên (student_id):</label>
+        <input type="number" name="student_id" placeholder="Ví dụ: 1" required><br><br>
+        
+        <label>Mã số Môn học (course_id):</label>
+        <input type="number" name="course_id" placeholder="Ví dụ: 1" required><br><br>
+        
+        <button type="submit">Bấm Đăng Ký Học Phần</button>
+    </form>
+</fieldset>
+
+<fieldset style="padding: 15px;">
+    <legend><b>Danh sách Học phần đã Đăng ký (Để Test Hủy)</b></legend>
+    <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; text-align: left;">
+        <thead>
+            <tr>
+                <th>Mã Đăng Ký</th>
+                <th>Tên Sinh Viên</th>
+                <th>Tên Môn Học</th>
+                <th>Hành Động</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for e in enrollments %}
+            <tr>
+                <td>{{ e.enrollment_id }}</td>
+                <td>{{ e.student_name }}</td>
+                <td>{{ e.course_name }}</td>
+                <td>
+                    <form action="/enroll/cancel/{{ e.enrollment_id }}" method="POST" style="margin:0;">
+                        <button type="submit" onclick="return confirm('Chắc chắn hủy?')">Hủy Học Phần</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" style="text-align: center; color: gray;">Chưa có dữ liệu học phần nào. Hãy nhập thử ở trên!</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</fieldset>
