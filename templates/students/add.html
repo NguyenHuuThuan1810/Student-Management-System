@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head><meta charset="UTF-8"><title>Thêm Sinh viên</title></head>
+<body>
+<h2>Thêm Sinh viên</h2>
+<a href="{{ url_for('student.list_students') }}">← Quay lại</a>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in messages %}<p><b>{{ msg }}</b></p>{% endfor %}
+{% endwith %}
+
+<form method="post">
+  <p>Student ID *: <input type="text" name="student_id" required></p>
+  <p>Họ tên *: <input type="text" name="full_name" required></p>
+  <p>Giới tính *:
+    <select name="gender" required>
+      <option value="">-- Chọn --</option>
+      <option value="Male">Nam</option>
+      <option value="Female">Nữ</option>
+    </select>
+  </p>
+  <p>Ngày sinh *: <input type="date" name="date_of_birth" required></p>
+  <p>Địa chỉ: <input type="text" name="address"></p>
+  <p>SĐT: <input type="text" name="phone"></p>
+  <p>Email: <input type="email" name="email"></p>
+  <p>Khoa / Ngành: <input type="text" name="department"></p>
+  <button type="submit">Lưu</button>
+  <a href="{{ url_for('student.list_students') }}">Huỷ</a>
+</form>
+</body>
+</html>

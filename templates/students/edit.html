@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head><meta charset="UTF-8"><title>Sửa Sinh viên</title></head>
+<body>
+<h2>Sửa Sinh viên — {{ student.student_id }}</h2>
+<a href="{{ url_for('student.view_student', student_id=student.student_id) }}">← Quay lại</a>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in messages %}<p><b>{{ msg }}</b></p>{% endfor %}
+{% endwith %}
+
+<form method="post">
+  <p>Họ tên *: <input type="text" name="full_name" value="{{ student.full_name }}" required></p>
+  <p>Giới tính *:
+    <select name="gender" required>
+      <option value="Male"   {{ 'selected' if student.gender == 'Male' }}>Nam</option>
+      <option value="Female" {{ 'selected' if student.gender == 'Female' }}>Nữ</option>
+    </select>
+  </p>
+  <p>Ngày sinh *: <input type="date" name="date_of_birth" value="{{ student.date_of_birth }}" required></p>
+  <p>Địa chỉ: <input type="text" name="address" value="{{ student.address or '' }}"></p>
+  <p>SĐT: <input type="text" name="phone" value="{{ student.phone or '' }}"></p>
+  <p>Email: <input type="email" name="email" value="{{ student.email or '' }}"></p>
+  <p>Khoa / Ngành: <input type="text" name="department" value="{{ student.department or '' }}"></p>
+  <button type="submit">Lưu thay đổi</button>
+  <a href="{{ url_for('student.view_student', student_id=student.student_id) }}">Huỷ</a>
+</form>
+</body>
+</html>
