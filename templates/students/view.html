@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Chi tiết Sinh viên</title>
+</head>
+<body>
+
+<h2>Chi tiết Sinh viên</h2>
+
+<a href="{{ url_for('student.list_students') }}">← Quay lại</a>
+
+<table border="1" cellpadding="6">
+
+    <tr>
+        <th>Student ID</th>
+        <td>{{ student.student_id }}</td>
+    </tr>
+
+    <tr>
+        <th>User ID</th>
+        <td>{{ student.user_id }}</td>
+    </tr>
+
+    <tr>
+        <th>Class</th>
+        <td>{{ student.class_id or '—' }}</td>
+    </tr>
+
+    <tr>
+        <th>Họ tên</th>
+        <td>{{ student.full_name }}</td>
+    </tr>
+
+    <tr>
+        <th>Giới tính</th>
+        <td>
+            {% if student.gender == 'Male' %}
+                Nam
+            {% elif student.gender == 'Female' %}
+                Nữ
+            {% else %}
+                Khác
+            {% endif %}
+        </td>
+    </tr>
+
+    <tr>
+        <th>Ngày sinh</th>
+        <td>{{ student.date_of_birth }}</td>
+    </tr>
+
+    <tr>
+        <th>Địa chỉ</th>
+        <td>{{ student.address or '—' }}</td>
+    </tr>
+
+    <tr>
+        <th>SĐT</th>
+        <td>{{ student.phone or '—' }}</td>
+    </tr>
+
+    <tr>
+        <th>Email</th>
+        <td>{{ student.email or '—' }}</td>
+    </tr>
+
+    <tr>
+        <th>Khoa / Ngành</th>
+        <td>{{ student.department or '—' }}</td>
+    </tr>
+
+</table>
+
+<br>
+
+<a href="{{ url_for('student.edit_student', student_id=student.student_id) }}">
+    Sửa
+</a>
+
+<form
+    method="post"
+    action="{{ url_for('student.delete_student', student_id=student.student_id) }}"
+    style="display:inline"
+    onsubmit="return confirm('Xoá sinh viên {{ student.full_name }}?')">
+
+    <button type="submit">
+        Xoá
+    </button>
+
+</form>
+
+</body>
+</html>
