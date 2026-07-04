@@ -1,31 +1,127 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head><meta charset="UTF-8"><title>Thêm Sinh viên</title></head>
+<head>
+    <meta charset="UTF-8">
+    <title>Thêm Sinh viên</title>
+</head>
 <body>
-<h2>Thêm Sinh viên</h2>
-<a href="{{ url_for('student.list_students') }}">← Quay lại</a>
 
+==================================================
+     Add Student Form
+================================================== 
+
+<h2>Thêm Sinh viên</h2>
+
+<p>
+    <a href="{{ url_for('student.list_students') }}">
+        ← Quay lại danh sách sinh viên
+    </a>
+</p>
+
+<!-- Flash Messages -->
 {% with messages = get_flashed_messages(with_categories=true) %}
-  {% for cat, msg in messages %}<p><b>{{ msg }}</b></p>{% endfor %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <p><strong>{{ message }}</strong></p>
+        {% endfor %}
+    {% endif %}
 {% endwith %}
 
-<form method="post">
-  <p>Student ID *: <input type="text" name="student_id" required></p>
-  <p>Họ tên *: <input type="text" name="full_name" required></p>
-  <p>Giới tính *:
-    <select name="gender" required>
-      <option value="">-- Chọn --</option>
-      <option value="Male">Nam</option>
-      <option value="Female">Nữ</option>
-    </select>
-  </p>
-  <p>Ngày sinh *: <input type="date" name="date_of_birth" required></p>
-  <p>Địa chỉ: <input type="text" name="address"></p>
-  <p>SĐT: <input type="text" name="phone"></p>
-  <p>Email: <input type="email" name="email"></p>
-  <p>Khoa / Ngành: <input type="text" name="department"></p>
-  <button type="submit">Lưu</button>
-  <a href="{{ url_for('student.list_students') }}">Huỷ</a>
+<form method="POST">
+
+    <!-- Student ID -->
+    <p>
+        <label>Student ID *:</label><br>
+        <input type="text" name="student_id" required>
+    </p>
+
+    <!-- User Account -->
+    <p>
+        <label>User Account *:</label><br>
+        <select name="user_id" required>
+            <option value="">-- Chọn tài khoản Student --</option>
+
+            {% for user in users %}
+            <option value="{{ user.user_id }}">
+                {{ user.user_id }} - {{ user.username }}
+            </option>
+            {% endfor %}
+        </select>
+    </p>
+
+    <!-- Class -->
+    <p>
+        <label>Class:</label><br>
+        <select name="class_id">
+            <option value="">-- Chưa phân lớp --</option>
+
+            {% for c in classes %}
+            <option value="{{ c.class_id }}">
+                {{ c.class_name }}
+            </option>
+            {% endfor %}
+        </select>
+    </p>
+
+    <!-- Full Name -->
+    <p>
+        <label>Họ và tên *:</label><br>
+        <input type="text" name="full_name" required>
+    </p>
+
+    <!-- Gender -->
+    <p>
+        <label>Giới tính *:</label><br>
+        <select name="gender" required>
+            <option value="">-- Chọn giới tính --</option>
+            <option value="Male">Nam</option>
+            <option value="Female">Nữ</option>
+            <option value="Other">Khác</option>
+        </select>
+    </p>
+
+    <!-- Date of Birth -->
+    <p>
+        <label>Ngày sinh *:</label><br>
+        <input type="date" name="date_of_birth" required>
+    </p>
+
+    <!-- Address -->
+    <p>
+        <label>Địa chỉ:</label><br>
+        <input type="text" name="address">
+    </p>
+
+    <!-- Phone -->
+    <p>
+        <label>Số điện thoại:</label><br>
+        <input type="text" name="phone">
+    </p>
+
+    <!-- Email -->
+    <p>
+        <label>Email:</label><br>
+        <input type="email" name="email">
+    </p>
+
+    <!-- Department -->
+    <p>
+        <label>Khoa / Ngành:</label><br>
+        <input type="text" name="department">
+    </p>
+
+    <!-- Buttons -->
+    <p>
+        <button type="submit">
+            Thêm sinh viên
+        </button>
+
+        <a href="{{ url_for('student.list_students') }}">
+            Huỷ
+        </a>
+    </p>
+
 </form>
+
 </body>
 </html>

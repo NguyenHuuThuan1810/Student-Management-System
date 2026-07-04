@@ -1,21 +1,56 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head><meta charset="UTF-8"><title>Thêm Môn học</title></head>
+<head>
+    <meta charset="UTF-8">
+    <title>Thêm môn học</title>
+</head>
+
 <body>
-<h2>Thêm Môn học</h2>
+
+<h2>Thêm môn học</h2>
+
 <a href="{{ url_for('course.list_courses') }}">← Quay lại</a>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
-  {% for cat, msg in messages %}<p><b>{{ msg }}</b></p>{% endfor %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <p><b>{{ message }}</b></p>
+        {% endfor %}
+    {% endif %}
 {% endwith %}
 
 <form method="post">
-  <p>Course ID *: <input type="text" name="course_id" required></p>
-  <p>Tên môn học *: <input type="text" name="course_name" required></p>
-  <p>Số tín chỉ *: <input type="number" name="credits" value="3" min="1" max="10" required></p>
-  <p>Mô tả: <textarea name="description" rows="3" cols="40"></textarea></p>
-  <button type="submit">Lưu</button>
-  <a href="{{ url_for('course.list_courses') }}">Huỷ</a>
+
+    <p>
+        Course ID *:
+        <input type="text" name="course_id" required>
+    </p>
+
+    <p>
+        Tên môn học *:
+        <input type="text" name="course_name" required>
+    </p>
+
+    <p>
+        Số tín chỉ *:
+        <input type="number"
+               name="credits"
+               value="3"
+               min="1"
+               max="10"
+               required>
+    </p>
+
+    <p>
+        Mô tả:
+        <textarea name="description" rows="3" cols="40"></textarea>
+    </p>
+
+    <button type="submit">Lưu</button>
+
+    <a href="{{ url_for('course.list_courses') }}">Huỷ</a>
+
 </form>
+
 </body>
 </html>
