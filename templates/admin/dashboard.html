@@ -1,3 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+</head>
+
+<body>
+
 <h1>Admin Dashboard</h1>
 
+<hr>
+
+<h2>Add User</h2>
+
+<form action="/admin/users/add" method="POST">
+
+    <input type="text" name="user_id" placeholder="User ID" required><br><br>
+
+    <input type="text" name="username" placeholder="Username" required><br><br>
+
+    <input type="password" name="password" placeholder="Password" required><br><br>
+
+    <select name="role">
+
+        <option value="Admin">Admin</option>
+
+        <option value="AcademicStaff">Academic Staff</option>
+
+        <option value="Student">Student</option>
+
+    </select>
+
+    <br><br>
+
+    <button type="submit">
+
+        Add User
+
+    </button>
+
+</form>
+
+<hr>
+
+<h2>User List</h2>
+
+<table border="1">
+
+<tr>
+
+    <th>User ID</th>
+
+    <th>Username</th>
+
+    <th>Role</th>
+
+    <th>Action</th>
+
+</tr>
+
+{% for user in users %}
+
+<tr>
+
+    <td>{{ user.user_id }}</td>
+
+    <td>{{ user.username }}</td>
+
+    <td>{{ user.role }}</td>
+
+    <td>
+
+        <a href="/admin/users/delete/{{ user.user_id }}">
+            Delete
+        </a>
+
+    </td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
 <a href="/logout">Logout</a>
+
+</body>
+</html>

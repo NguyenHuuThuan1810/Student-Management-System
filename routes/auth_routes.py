@@ -12,7 +12,9 @@ def login(username, password):
     cursor = conn.cursor(dictionary=True)
 
     query = """
-        SELECT user_id, role
+         SELECT user_id,
+               username,
+               role
         FROM users
         WHERE username=%s
         AND password=%s
@@ -20,12 +22,12 @@ def login(username, password):
 
     cursor.execute(query, (username, password))
 
-    result = cursor.fetchone()
+    user = cursor.fetchone()
 
     cursor.close()
     conn.close()
 
-    return result
+    return user
 
 # Hiển thị trang Login
 @auth_bp.route("/")
@@ -40,24 +42,23 @@ def login_route():
     username = request.form["username"]
     password = request.form["password"]
 
-    result = login(username, password)
+    user = login(username, password)
 
-    if result:
+    if not user:
+        return "Invalid Username or Password"
 
-        role = result["role"]
+    session["user_id"] = user["user_id"]
+    session["role"] = user["role"]
 
-        session["role"] = role
+    if user["role"] == "Admin":
+        return redirect("/admin/dashboard")
 
-        if role == "Admin":
-            return redirect("/admin/dashboard")
+    elif user["role"] == "AcademicStaff":
+        return redirect("/staff/dashboard")
 
-        elif role == "AcademicStaff":
-            return redirect("/staff/dashboard")
+    else:
+        return redirect("/student/dashboard")
 
-        elif role == "Student":
-            return redirect("/student/dashboard")
-
-    return "Invalid Username or Password"
 
 
 # Logout
