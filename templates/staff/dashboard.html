@@ -28,10 +28,10 @@
     <legend><b>Test: Thêm / Sửa điểm sinh viên</b></legend>
     <form action="/grade/save" method="POST">
         <label>Student ID:</label>
-        <input type="number" name="student_id" placeholder="Ví dụ: 1" required><br><br>
+        <input type="text" name="student_id" placeholder="Ví dụ: 1" required><br><br>
         
         <label>Course ID:</label>
-        <input type="number" name="course_id" placeholder="Ví dụ: 1" required><br><br>
+        <input type="text" name="course_id" placeholder="Ví dụ: 1" required><br><br>
         
         <label>Điểm Quá Trình (Assignment - Hệ số 0.4):</label>
         <input type="number" step="0.1" name="assignment_score" min="0" max="10" required><br><br>
