@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, session, flash, redirect, url_for
 
-student_bp = Blueprint("student", __name__)
+student_role_bp = Blueprint("studentrole", __name__)
 
-@student_bp.route("/student/dashboard")
+@student_role_bp.route("/student/dashboard")
 def student_dashboard():
 
     if session.get("role") != "Student":
