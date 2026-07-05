@@ -1,6 +1,11 @@
-from flask import Blueprint, render_template, session, redirect, request
+from flask import Blueprint, render_template, session, redirect, request, flash, url_for
 from database.db import get_connection
 import re
+
+# ==========================================
+# Administrator Routes
+# User Account Management
+# ==========================================
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -8,13 +13,18 @@ admin_bp = Blueprint("admin", __name__)
 def dashboard():
 
     if session.get("role") != "Admin":
-        return redirect("/")
-
+        flash("Bạn không có quyền truy cập.", "danger")
+        return redirect(url_for("auth.home"))
+    
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
-        SELECT *
+        SELECT
+            user_id,
+            username,
+            role,
+            created_at
         FROM users
         ORDER BY created_at DESC
     """)
@@ -34,7 +44,8 @@ def dashboard():
 def add_user():
 
     if session.get("role") != "Admin":
-        return redirect("/")
+        flash("Bạn không có quyền thực hiện chức năng này.", "danger")
+        return redirect(url_for("auth.home"))
 
     user_id = request.form["user_id"]
     username = request.form["username"]
@@ -42,14 +53,18 @@ def add_user():
     role = request.form["role"]
 
     if not re.fullmatch(r"U\d{3}", user_id):
-        return "User ID must be in format U001, U002, U999"
+        flash("User ID phải có định dạng U001.", "danger")
+        return redirect(url_for("admin.dashboard"))
     if not re.fullmatch(r"[A-Za-z0-9_]{4,30}", username):
-        return "Username must be 4-30 characters and contain only letters, numbers or underscore."
+        flash("Username chỉ gồm chữ, số hoặc dấu gạch dưới (_), từ 4 đến 30 ký tự.", "danger")
+        return redirect(url_for("admin.dashboard"))
     if len(password) < 6:
-        return "Password must be at least 6 characters."
+        flash("Mật khẩu phải có ít nhất 6 ký tự.", "danger")
+        return redirect(url_for("admin.dashboard"))
 
     if role not in ["Admin", "AcademicStaff", "Student"]:
-        return "Invalid role."
+        flash("Role không hợp lệ.", "danger")
+        return redirect(url_for("admin.dashboard"))
     
 
     conn = get_connection()
@@ -57,21 +72,23 @@ def add_user():
 
     # Kiểm tra User ID
     cursor.execute(
-        "SELECT user_id FROM users WHERE user_id=%s", (user_id,))
+        "SELECT user_id FROM users WHERE user_id = %s", (user_id,))
 
     if cursor.fetchone():
         cursor.close()
         conn.close()
-        return "User ID already exists."
+        flash("User ID đã tồn tại.", "danger")
+        return redirect(url_for("admin.dashboard"))
 
     # Kiểm tra Username
     cursor.execute(
-        "SELECT username FROM users WHERE username=%s", (username,))
+        "SELECT username FROM users WHERE username = %s", (username,))
 
     if cursor.fetchone():
         cursor.close()
         conn.close()
-        return "Username already exists."
+        flash("Username đã tồn tại.", "danger")
+        return redirect(url_for("admin.dashboard"))
 
     sql = """
         INSERT INTO users
@@ -83,33 +100,45 @@ def add_user():
         )
         VALUES
         (
-            %s,%s,%s,%s
+            %s, %s, %s, %s
         )
     """
 
-    cursor.execute(
-        sql,
-        (
-            user_id,
-            username,
-            password,
-            role
+    try:
+        cursor.execute(
+            sql,
+            (
+                user_id,
+                username,
+                password,
+                role
+            )
         )
-    )
 
-    conn.commit()
+        conn.commit()
 
-    cursor.close()
-    conn.close()
+        flash("Tạo tài khoản thành công.", "success")
 
-    return redirect("/admin/dashboard")
+    except Exception as e:
+
+        conn.rollback()
+
+        flash(f"Lỗi hệ thống: {str(e)}", "danger")
+
+    finally:
+
+        cursor.close()
+        conn.close()
+
+    return redirect(url_for("admin.dashboard"))
 
 #Edit user
 @admin_bp.route("/admin/users/update/<user_id>", methods=["POST"])
 def update_user(user_id):
 
     if session.get("role") != "Admin":
-        return redirect("/")
+        flash("Bạn không có quyền thực hiện chức năng này.", "danger")
+        return redirect(url_for("auth.home"))
 
     username = request.form["username"]
     password = request.form["password"]
@@ -117,61 +146,104 @@ def update_user(user_id):
 
 
     if not re.fullmatch(r"[A-Za-z0-9_]{4,30}", username):
-        return "Username must be 4-30 characters and contain only letters, numbers or underscore."
+        flash("Username chỉ gồm chữ, số hoặc dấu gạch dưới (_), từ 4 đến 30 ký tự.", "danger")
+        return redirect(url_for("admin.dashboard"))
+    
     if len(password) < 6:
-        return "Password must be at least 6 characters."
+        flash("Mật khẩu phải có ít nhất 6 ký tự.", "danger")
+        return redirect(url_for("admin.dashboard"))
 
     if role not in ["Admin", "AcademicStaff", "Student"]:
-        return "Invalid role."
+        flash("Role không hợp lệ.", "danger")
+        return redirect(url_for("admin.dashboard"))
 
     conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-        UPDATE users
-        SET
-            username=%s,
-            password=%s,
-            role=%s
-        WHERE user_id=%s
-    """,
-    (
-        username,
-        password,
-        role,
-        user_id
-    ))
+        SELECT user_id
+        FROM users
+        WHERE username = %s
+        AND user_id <> %s
+    """, (username, user_id))
 
-    conn.commit()
+    if cursor.fetchone():
+        cursor.close()
+        conn.close()
+        flash("Username đã tồn tại.", "danger")
+        return redirect(url_for("admin.dashboard"))
 
-    cursor.close()
-    conn.close()
+    try:
 
-    return redirect("/admin/dashboard")
+        cursor.execute("""
+            UPDATE users
+            SET
+                username = %s,
+                password = %s,
+                role = %s
+            WHERE user_id = %s
+        """,
+        (
+            username,
+            password,
+            role,
+            user_id
+        ))
+
+        conn.commit()
+
+        flash("Cập nhật tài khoản thành công.", "success")
+
+    except Exception as e:
+
+        conn.rollback()
+
+        flash(f"Lỗi hệ thống: {str(e)}", "danger")
+
+    finally:
+
+        cursor.close()
+        conn.close()
+
+    return redirect(url_for("admin.dashboard"))
 
 # Xóa user account
-@admin_bp.route("/admin/users/delete/<user_id>")
+@admin_bp.route("/admin/users/delete/<user_id>", methods=["POST"])
 def delete_user(user_id):
 
     if session.get("role") != "Admin":
-        return redirect("/")
+        flash("Bạn không có quyền thực hiện chức năng này.", "danger")
+        return redirect(url_for("auth.home"))
     
     #User không thể xóa chính mình
     if user_id == session.get("user_id"):
-        return "You cannot delete your own account."
+        flash("Bạn không thể xóa chính tài khoản của mình.", "warning")
+        return redirect(url_for("admin.dashboard"))
 
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("""
-        DELETE
-        FROM users
-        WHERE user_id=%s
-    """,(user_id,))
+    try:
 
-    conn.commit()
+        cursor.execute("""
+            DELETE
+            FROM users
+            WHERE user_id = %s
+        """, (user_id,))
 
-    cursor.close()
-    conn.close()
+        conn.commit()
 
-    return redirect("/admin/dashboard")
+        flash("Xóa tài khoản thành công.", "success")
+
+    except Exception as e:
+
+        conn.rollback()
+
+        flash(f"Lỗi hệ thống: {str(e)}", "danger")
+
+    finally:
+
+        cursor.close()
+        conn.close()
+
+    return redirect(url_for("admin.dashboard"))
