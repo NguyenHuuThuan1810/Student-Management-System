@@ -1,76 +1,120 @@
-<h1>Academic Staff Dashboard</h1>
+{% extends "base/base_layout.html" %}
 
-<a href="/logout">Logout</a>
-<hr>
-<h3>--- KHU VỰC TEST MODULE GRADE (QUẢN LÝ ĐIỂM & CALCULATE GPA) ---</h3>
+{% block title %}Staff Dashboard{% endblock %}
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      {% if category == 'success' %}
-        <div style="color: green; font-weight: bold;">{{ message }}</div>
-      {% else %}
-        <div style="color: red; font-weight: bold;">{{ message }}</div>
-      {% endif %}
-    {% endfor %}
-  {% endif %}
-{% endwith %}
-        {{ message }}
-      </div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
+{% block sidebar %}
+    {% include "staff/sidebar.html" %}
+{% endblock %}
 
-<fieldset style="margin-bottom: 20px; padding: 15px;">
-    <legend><b>Test: Thêm / Sửa điểm sinh viên</b></legend>
-    <form action="/grade/save" method="POST">
-        <label>Student ID:</label>
-        <input type="text" name="student_id" placeholder="Ví dụ: 1" required><br><br>
-        
-        <label>Course ID:</label>
-        <input type="text" name="course_id" placeholder="Ví dụ: 1" required><br><br>
-        
-        <label>Điểm Quá Trình (Assignment - Hệ số 0.4):</label>
-        <input type="number" step="0.1" name="assignment_score" min="0" max="10" required><br><br>
-        
-        <label>Điểm Cuối Kỳ (Exam - Hệ số 0.6):</label>
-        <input type="number" step="0.1" name="exam_score" min="0" max="10" required><br><br>
-        
-        <button type="submit">Lưu Điểm & Tự Tính Điểm Tổng Kết</button>
-    </form>
-</fieldset>
+{% block page_title %}
+Dashboard
+{% endblock %}
 
-<fieldset style="padding: 15px;">
-    <legend><b>Bảng Điểm Sinh Viên hiện tại</b></legend>
-    <table border="1" cellpadding="8" cellspacing="0" style="width: 100%;">
-        <thead>
-            <tr>
-                <th>Mã Điểm</th>
-                <th>Sinh Viên</th>
-                <th>Môn Học</th>
-                <th>Điểm Quá Trình</th>
-                <th>Điểm Cuối Kỳ</th>
-                <th>Điểm Tổng Kết (Hệ 10)</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for g in grades %}
-            <tr>
-                <td>{{ g.grade_id }}</td>
-                <td>{{ g.student_name }}</td>
-                <td>{{ g.course_name }}</td>
-                <td>{{ g.assignment_score }}</td>
-                <td>{{ g.exam_score }}</td>
-                <td><b>{{ g.final_score }}</b></td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="6" style="text-align: center; color: gray;">Chưa có dữ liệu điểm.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</fieldset>
+{% block content %}
+
+<div class="page">
+
+    <div class="page-title">
+        <h1>Dashboard</h1>
+        <p>Academic Staff Panel</p>
+    </div>
+
+    <div class="card-group">
+
+        <div class="card">
+            <h3>Total Students</h3>
+            <div class="card-number">{{ total_students }}</div>
+        </div>
+
+        <div class="card">
+            <h3>Total Courses</h3>
+            <div class="card-number">{{ total_courses }}</div>
+        </div>
+
+        <div class="card">
+            <h3>Total Grades</h3>
+            <div class="card-number">{{ total_grades }}</div>
+        </div>
+
+        <div class="card">
+            <h3>Average Score</h3>
+            <div class="card-number">
+                {{ average_score if average_score else 0 }}
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="dashboard-grid">
+
+        <div class="table-container">
+
+            <div class="table-header">
+                <h3>Recent Students</h3>
+            </div>
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for student in recent_students %}
+
+                    <tr>
+                        <td>{{ student.student_id }}</td>
+                        <td>{{ student.full_name }}</td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <div class="table-container">
+
+            <div class="table-header">
+                <h3>Recent Courses</h3>
+            </div>
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Course</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for course in recent_courses %}
+
+                    <tr>
+                        <td>{{ course.course_id }}</td>
+                        <td>{{ course.course_name }}</td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

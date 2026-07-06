@@ -1,0 +1,204 @@
+{% extends "base/base_layout.html" %}
+
+{% block title %}
+Enrollments
+{% endblock %}
+
+{% block sidebar %}
+    {% include "student/sidebar.html" %}
+{% endblock %}
+
+{% block page_title %}
+Enrollments
+{% endblock %}
+
+{% block content %}
+
+<div class="page">
+
+    <div class="page-title">
+        <h1>Course Enrollment</h1>
+        <p>Register and manage your enrolled courses.</p>
+    </div>
+
+    <div class="toolbar">
+
+        <button
+            class="btn btn-primary"
+            onclick="document.getElementById('registerModal').style.display='block'">
+
+            + Register Course
+
+        </button>
+
+    </div>
+
+    <div class="table-container">
+
+        <table id="enrollmentTable">
+
+            <thead>
+
+                <tr>
+
+                    <th>Enrollment ID</th>
+                    <th>Course</th>
+                    <th>Semester</th>
+                    <th>Status</th>
+                    <th>Enrollment Date</th>
+                    <th>Action</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            {% for enrollment in enrollments %}
+
+                <tr>
+
+                    <td>{{ enrollment.enrollment_id }}</td>
+
+                    <td>{{ enrollment.course_name }}</td>
+
+                    <td>{{ enrollment.semester }}</td>
+
+                    <td>
+
+                        {% if enrollment.status == "Registered" %}
+                            <span class="badge badge-success">
+                                {{ enrollment.status }}
+                            </span>
+
+                        {% elif enrollment.status == "Completed" %}
+                            <span class="badge badge-info">
+                                {{ enrollment.status }}
+                            </span>
+
+                        {% else %}
+                            <span class="badge badge-warning">
+                                {{ enrollment.status }}
+                            </span>
+                        {% endif %}
+
+                    </td>
+
+                    <td>{{ enrollment.enrollment_date }}</td>
+
+                    <td>
+
+                        {% if enrollment.status == "Registered" %}
+
+                        <form
+                            action="{{ url_for('enrollment.cancel_enrollment', enrollment_id=enrollment.enrollment_id) }}"
+                            method="POST"
+                            style="display:inline;">
+
+                            <button
+                                class="btn btn-danger"
+                                onclick="return confirm('Cancel this enrollment?')">
+
+                                Cancel
+
+                            </button>
+
+                        </form>
+
+                        {% else %}
+
+                        -
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<!-- REGISTER COURSE MODAL -->
+
+<div
+    id="registerModal"
+    class="modal">
+
+    <div class="modal-content">
+
+        <span
+            class="close"
+            onclick="document.getElementById('registerModal').style.display='none'">
+
+            &times;
+
+        </span>
+
+        <h2>Register Course</h2>
+
+        <form
+            action="{{ url_for('enrollment.register_course') }}"
+            method="POST">
+
+            <div class="form-group">
+
+                <label>Course</label>
+
+                <select
+                    name="course_id"
+                    class="form-control"
+                    required>
+
+                    <option value="">
+                        -- Select Course --
+                    </option>
+
+                    {% for course in courses %}
+
+                    <option value="{{ course.course_id }}">
+
+                        {{ course.course_id }} - {{ course.course_name }}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>Semester</label>
+
+                <input
+                    type="text"
+                    name="semester"
+                    class="form-control"
+                    value="2025-2026 HK2"
+                    required>
+
+            </div>
+
+            <button
+                class="btn btn-primary"
+                type="submit">
+
+                Register
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

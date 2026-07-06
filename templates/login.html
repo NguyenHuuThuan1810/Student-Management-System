@@ -1,27 +1,60 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-    <title>Login</title>
+    <meta charset="UTF-8">
+    <title>Student Management System | Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
 </head>
 <body>
+<div class="login-wrapper">
+    <!-- Panel bên trái -->
+    <div class="login-left">
+        <h5>HỆ THỐNG QUẢN LÝ HỌC SINH</h5>
+        <h1>Quản lý lớp học thông minh, hiệu quả hơn.</h1>
 
-    <h2>Student Management System</h2>
+        <div class="stats">
+            <div class="stat-box">
+                <h3>1.248</h3>
+                <p>HỌC SINH</p>
+            </div>
+            <div class="stat-box">
+                <h3>34</h3>
+                <p>KHÓA HỌC</p>
+            </div>
+            <div class="stat-box">
+                <h3>78%</h3>
+                <p>HOÀN THÀNH TB</p>
+            </div>
+            <div class="stat-box">
+                <h3>62</h3>
+                <p>GIÁO VIÊN</p>
+            </div>
+        </div>
+    </div>
 
-    <form action="/login" method="POST">
+    <!-- Panel bên phải -->
+    <div class="login-right">
+        <h2>Chào mừng trở lại</h2>
+        <p>Đăng nhập vào tài khoản của bạn</p>
+        {% include "base/flash_messages.html" %}
 
-        <label>Username</label>
-        <input type="text" name="username" required>
+        <form method="POST" action="{{ url_for('auth.login_route') }}">
+            <label for="username">Tên đăng nhập</label>
+            <input type="text" id="username" name="username" placeholder="Nhập tên đăng nhập" autocomplete="username" required>
 
-        <br><br>
+            <label for="password">Mật khẩu</label>
+            <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
 
-        <label>Password</label>
-        <input type="password" name="password" required>
+            <div class="options">
+                <a href="#">Quên mật khẩu?</a>
+                <label><input type="checkbox" name="remember"> Ghi nhớ đăng nhập</label>
+            </div>
 
-        <br><br>
+            <button type="submit">Đăng nhập</button>
+        </form>
 
-        <button type="submit">Login</button>
-
-    </form>
-
+        <p class="footer">Chưa có tài khoản? <a href="#">Liên hệ quản trị viên</a></p>
+    </div>
+</div>
 </body>
 </html>

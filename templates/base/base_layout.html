@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}Student Management System{% endblock %}</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head>
+
+<body>
+
+<div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        {% block sidebar %}
+        {% endblock %}
+    </aside>
+
+    <!-- Main -->
+    <div class="main-content">
+
+        <!-- Navbar -->
+        {% include "base/navbar.html" %}
+
+        <!-- Flash Message -->
+        {% include "base/flash_messages.html" %}
+
+        <!-- Nội dung -->
+        <main class="content">
+
+            {% block content %}
+            {% endblock %}
+
+        </main>
+
+    </div>
+
+</div>
+
+</body>
+</html>

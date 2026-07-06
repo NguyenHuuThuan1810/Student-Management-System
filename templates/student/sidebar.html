@@ -1,0 +1,32 @@
+<div class="logo">
+    <h2>SMS</h2>
+    <p>Student Panel</p>
+</div>
+
+<ul class="menu">
+
+    <li>
+        <a href="{{ url_for('studentrole.dashboard') }}">
+            Dashboard
+        </a>
+    </li>
+
+    <li>
+        <a href="{{ url_for('enrollment.view_enrollments') }}">
+            Enrollments
+        </a>
+    </li>
+
+    <li>
+        <a href="{{ url_for('grade.view_grades') }}">
+            Grades
+        </a>
+    </li>
+
+</ul>
+
+<div class="logout">
+    <a href="{{ url_for('auth.logout') }}">
+        Logout
+    </a>
+</div>

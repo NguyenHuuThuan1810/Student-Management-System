@@ -203,12 +203,12 @@ INSERT INTO students (student_id, class_id, user_id, full_name, gender, date_of_
 ('ST003', 'CL002', 'U006', 'Hoang Anh Tuan', 'Male', '2003-11-08', 'Ho Chi Minh City', '0912000003', 'tuan.hoang@student.edu.vn', 'Business Administration');
 
 INSERT INTO enrollments (enrollment_id, student_id, course_id, semester, status, enrollment_date) VALUES
-('EN001', 'ST001', 'C001', '2025-2026 HK1', 'Registered', '2025-09-01'),
-('EN002', 'ST001', 'C002', '2025-2026 HK1', 'Registered', '2025-09-01'),
-('EN003', 'ST002', 'C001', '2025-2026 HK1', 'Registered', '2025-09-01'),
-('EN004', 'ST002', 'C003', '2025-2026 HK1', 'Registered', '2025-09-02'),
-('EN005', 'ST003', 'C002', '2025-2026 HK1', 'Registered', '2025-09-02'),
-('EN006', 'ST003', 'C003', '2025-2026 HK1', 'Registered', '2025-09-02');
+('EN001', 'ST001', 'C001', '2025-2026 HK1', 'Completed', '2025-09-01'),
+('EN002', 'ST001', 'C002', '2025-2026 HK1', 'Completed', '2025-09-01'),
+('EN003', 'ST002', 'C001', '2025-2026 HK1', 'Completed', '2025-09-01'),
+('EN004', 'ST002', 'C003', '2025-2026 HK1', 'Completed', '2025-09-02'),
+('EN005', 'ST003', 'C002', '2025-2026 HK1', 'Completed', '2025-09-02'),
+('EN006', 'ST003', 'C003', '2025-2026 HK1', 'Completed', '2025-09-02');
 
 INSERT INTO grades (grade_id, student_id, staff_id, course_id, attendance_score, midterm_score, final_score, total_score, letter_grade) VALUES
 ('G001', 'ST001', 'AS001', 'C001', 9.00, 8.00, 8.50, 8.45, 'B+'),

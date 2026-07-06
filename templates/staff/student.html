@@ -1,0 +1,455 @@
+{% extends "base/base_layout.html" %}
+
+{% block title %}Students{% endblock %}
+
+{% block sidebar %}
+    {% include "staff/sidebar.html" %}
+{% endblock %}
+
+{% block page_title %}
+Students
+{% endblock %}
+
+{% block content %}
+
+<div class="page">
+
+    <div class="page-title">
+        <h1>Student Management</h1>
+        <p>Manage student information</p>
+    </div>
+
+    <div class="toolbar">
+
+        <input
+            type="text"
+            id="searchStudent"
+            placeholder="Search student..."
+            onkeyup="searchStudent()"
+        >
+
+        <button class="btn btn-primary"
+                onclick="document.getElementById('addStudentModal').style.display='block'">
+
+            + Add Student
+
+        </button>
+
+    </div>
+
+    <div class="table-container">
+
+        <table id="studentTable">
+
+            <thead>
+
+            <tr>
+
+                <th>ID</th>
+                <th>Full Name</th>
+                <th>Gender</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Action</th>
+
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+            {% for student in students %}
+
+            <tr>
+
+                <td>{{ student.student_id }}</td>
+
+                <td>{{ student.full_name }}</td>
+
+                <td>{{ student.gender }}</td>
+
+                <td>{{ student.email }}</td>
+
+                <td>{{ student.phone }}</td>
+
+                <td>
+
+                    <button
+                        class="btn btn-warning"
+
+                        onclick="openEditStudent(
+                            '{{ student.student_id }}',
+                            '{{ student.class_id }}',
+                            '{{ student.full_name }}',
+                            '{{ student.gender }}',
+                            '{{ student.date_of_birth }}',
+                            '{{ student.email }}',
+                            '{{ student.phone }}',
+                            '{{ student.address }}',
+                            '{{ student.department }}'
+                        )">
+
+                        Edit
+
+                    </button>
+
+                    <form
+                        action="{{ url_for('student.delete_student', student_id=student.student_id) }}"
+                        method="POST"
+                        style="display:inline;">
+
+                        <button
+                            class="btn btn-danger"
+                            onclick="return confirm('Delete this student?')">
+
+                            Delete
+
+                        </button>
+
+                    </form>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<!-- ADD MODAL -->
+
+<div id="addStudentModal" class="modal">
+
+<div class="modal-content">
+
+<span class="close"
+onclick="document.getElementById('addStudentModal').style.display='none'">
+
+&times;
+
+</span>
+
+<h2>Add Student</h2>
+
+<form
+method="POST"
+action="{{ url_for('student.add_student') }}">
+
+<div class="form-group">
+    <label>User Account *</label>
+
+    <select name="user_id" class="form-control" required>
+        <option value="">-- Select Student Account --</option>
+
+        {% for user in users %}
+        <option value="{{ user.user_id }}">
+            {{ user.user_id }} - {{ user.username }}
+        </option>
+        {% endfor %}
+    </select>
+</div>
+<div class="form-group">
+    <label>Class</label>
+    <select name="class_id" class="form-control">
+        <option value="">-- None --</option>
+        {% for c in classes %}
+        <option value="{{ c.class_id }}">
+            {{ c.class_name }}
+        </option>
+        {% endfor %}
+    </select>
+</div>
+<div class="form-group">
+    <label>Department</label>
+    <input type="text" name="department" class="form-control">
+</div>
+<div class="form-group">
+<label>ID</label>
+
+<input
+class="form-control"
+name="student_id"
+required>
+
+</div>
+
+<div class="form-group">
+
+<label>Full Name</label>
+
+<input
+class="form-control"
+name="full_name"
+required>
+
+</div>
+
+<div class="form-group">
+
+<label>Gender</label>
+
+<select
+class="form-control"
+name="gender">
+
+<option value="Male">Male</option>
+<option value="Female">Female</option>
+
+</select>
+
+</div>
+
+<div class="form-group">
+
+<label>Date of Birth</label>
+
+<input
+class="form-control"
+type="date"
+name="date_of_birth"
+required>
+
+</div>
+
+<div class="form-group">
+
+<label>Email</label>
+
+<input
+class="form-control"
+type="email"
+name="email">
+
+</div>
+
+<div class="form-group">
+
+<label>Phone</label>
+
+<input
+class="form-control"
+name="phone">
+
+</div>
+
+<div class="form-group">
+
+<label>Address</label>
+
+<textarea
+class="form-control"
+name="address"></textarea>
+
+</div>
+
+<button class="btn btn-primary">
+
+Save
+
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+
+
+<!-- EDIT MODAL -->
+
+<div id="editStudentModal" class="modal">
+
+<div class="modal-content">
+
+<span class="close"
+onclick="document.getElementById('editStudentModal').style.display='none'">
+
+&times;
+
+</span>
+
+<h2>Edit Student</h2>
+
+<form
+id="editStudentForm"
+method="POST">
+
+<div class="form-group">
+
+    <label>Class</label>
+
+    <select
+        id="edit_class_id"
+        name="class_id"
+        class="form-control">
+
+        <option value="">-- None --</option>
+
+        {% for c in classes %}
+        <option value="{{ c.class_id }}">
+            {{ c.class_name }}
+        </option>
+        {% endfor %}
+
+    </select>
+
+</div>
+
+<div class="form-group">
+
+<label>Full Name</label>
+
+<input
+id="edit_name"
+name="full_name"
+required>
+
+</div>
+
+<div class="form-group">
+
+<label>Gender</label>
+
+<select
+id="edit_gender"
+name="gender">
+
+<option>Male</option>
+
+<option>Female</option>
+
+</select>
+
+</div>
+
+<div class="form-group">
+
+<label>Date of Birth</label>
+
+<input
+type="date"
+id="edit_dob"
+name="date_of_birth">
+
+</div>
+
+<div class="form-group">
+
+<label>Email</label>
+
+<input
+id="edit_email"
+type="email"
+name="email">
+
+</div>
+
+<div class="form-group">
+
+<label>Phone</label>
+
+<input
+id="edit_phone"
+name="phone">
+
+</div>
+
+<div class="form-group">
+
+<label>Address</label>
+
+<textarea
+id="edit_address"
+name="address"></textarea>
+
+</div>
+
+<div class="form-group">
+
+    <label>Department</label>
+
+    <input
+        type="text"
+        id="edit_department"
+        name="department"
+        class="form-control">
+
+</div>
+
+<button class="btn btn-primary">
+
+Update
+
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+
+
+<script>
+
+function searchStudent(){
+
+let input=document.getElementById("searchStudent").value.toUpperCase();
+
+let table=document.getElementById("studentTable");
+
+let tr=table.getElementsByTagName("tr");
+
+for(let i=1;i<tr.length;i++){
+
+let td=tr[i].getElementsByTagName("td")[1];
+
+if(td){
+
+tr[i].style.display=td.innerHTML.toUpperCase().indexOf(input)>-1?"":"none";
+
+}
+
+}
+
+}
+
+function openEditStudent(
+    id,
+    class_id,
+    name,
+    gender,
+    dob,
+    email,
+    phone,
+    address,
+    department
+){
+
+document.getElementById("editStudentForm").action=
+"/student/update/"+id;
+
+document.getElementById("edit_name").value=name;
+document.getElementById("edit_gender").value=gender;
+document.getElementById("edit_dob").value=dob;
+document.getElementById("edit_email").value=email;
+document.getElementById("edit_phone").value=phone;
+document.getElementById("edit_address").value=address;
+document.getElementById("edit_class_id").value = class_id;
+document.getElementById("edit_department").value = department;
+
+document.getElementById("editStudentModal").style.display="block";
+
+}
+
+</script>
+
+{% endblock %}

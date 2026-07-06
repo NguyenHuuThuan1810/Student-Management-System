@@ -1,0 +1,40 @@
+<div class="logo">
+    <h2>SMS</h2>
+    <small>Academic Staff</small>
+</div>
+
+<ul class="menu">
+
+    <li>
+        <a href="{{ url_for('staff.staff_dashboard') }}">
+            🏠 Dashboard
+        </a>
+    </li>
+
+   <li>
+        <a href="{{ url_for('student.list_students') }}">
+            👨‍🎓 Students
+        </a>
+    </li>
+
+    <li>
+        <a href="{{ url_for('course.list_courses') }}">
+            📚 Courses
+        </a>
+    </li>
+
+    <li>
+        <a href="{{ url_for('grade.view_grades') }}">
+            📊 Grades
+        </a>
+    </li>
+
+</ul>
+
+<div class="logout">
+
+    <a href="{{ url_for('auth.logout') }}">
+        🚪 Logout
+    </a>
+
+</div>

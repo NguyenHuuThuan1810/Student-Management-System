@@ -1,0 +1,140 @@
+{% extends "base/base_layout.html" %}
+
+{% block title %}
+Grades
+{% endblock %}
+
+{% block sidebar %}
+    {% include "student/sidebar.html" %}
+{% endblock %}
+
+{% block page_title %}
+Grades
+{% endblock %}
+
+{% block content %}
+
+<div class="page">
+
+    <div class="page-title">
+        <h1>My Grades</h1>
+        <p>View your academic results</p>
+    </div>
+
+    <div class="toolbar">
+
+        <input
+            type="text"
+            id="searchGrade"
+            placeholder="Search course..."
+            onkeyup="searchGrade()">
+
+    </div>
+
+    <div class="table-container">
+
+        <table id="gradeTable">
+
+            <thead>
+
+                <tr>
+
+                    <th>Course</th>
+                    <th>Attendance</th>
+                    <th>Midterm</th>
+                    <th>Final</th>
+                    <th>Total</th>
+                    <th>Letter Grade</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for grade in grades %}
+
+                <tr>
+
+                    <td>{{ grade.course_name }}</td>
+
+                    <td>{{ grade.attendance_score }}</td>
+
+                    <td>{{ grade.midterm_score }}</td>
+
+                    <td>{{ grade.final_score }}</td>
+
+                    <td>{{ grade.total_score }}</td>
+
+                    <td>
+
+                        {% if grade.letter_grade == "A" %}
+
+                            <span class="badge badge-success">
+                                {{ grade.letter_grade }}
+                            </span>
+
+                        {% elif grade.letter_grade in ["B+", "B"] %}
+
+                            <span class="badge badge-info">
+                                {{ grade.letter_grade }}
+                            </span>
+
+                        {% elif grade.letter_grade in ["C+", "C"] %}
+
+                            <span class="badge badge-warning">
+                                {{ grade.letter_grade }}
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge badge-danger">
+                                {{ grade.letter_grade }}
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<script>
+
+function searchGrade(){
+
+    let input = document.getElementById("searchGrade").value.toUpperCase();
+
+    let table = document.getElementById("gradeTable");
+
+    let tr = table.getElementsByTagName("tr");
+
+    for(let i = 1; i < tr.length; i++){
+
+        let td = tr[i].getElementsByTagName("td")[0];
+
+        if(td){
+
+            tr[i].style.display =
+                td.innerHTML.toUpperCase().indexOf(input) > -1
+                ? ""
+                : "none";
+
+        }
+
+    }
+
+}
+
+</script>
+
+{% endblock %}

@@ -1,88 +1,401 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Admin Dashboard</title>
-</head>
+{% extends "base/base_layout.html" %}
 
-<body>
+{% block title %}Admin Dashboard{% endblock %}
 
-<h1>Admin Dashboard</h1>
+{% block sidebar %}
+    {% include "admin/sidebar.html" %}
+{% endblock %}
 
-<hr>
+{% block content %}
 
-<h2>Add User</h2>
+{% include "base/flash_messages.html" %}
 
-<form action="/admin/users/add" method="POST">
+<div class="page">
 
-    <input type="text" name="user_id" placeholder="User ID" required><br><br>
+    <div class="page-title">
+        <h1>Dashboard</h1>
+        <p>Administrator Panel</p>
+    </div>
 
-    <input type="text" name="username" placeholder="Username" required><br><br>
+    <!-- Statistics -->
+    <div class="card-group">
 
-    <input type="password" name="password" placeholder="Password" required><br><br>
+        <div class="card">
+            <h3>Total Users</h3>
+            <div class="card-number">
+                {{ users|length }}
+            </div>
+        </div>
 
-    <select name="role">
+        <div class="card">
+            <h3>Admins</h3>
+            <div class="card-number">
+                {{ users|selectattr("role","equalto","Admin")|list|length }}
+            </div>
+        </div>
 
-        <option value="Admin">Admin</option>
+        <div class="card">
+            <h3>Academic Staff</h3>
+            <div class="card-number">
+                {{ users|selectattr("role","equalto","AcademicStaff")|list|length }}
+            </div>
+        </div>
 
-        <option value="AcademicStaff">Academic Staff</option>
+        <div class="card">
+            <h3>Students</h3>
+            <div class="card-number">
+                {{ users|selectattr("role","equalto","Student")|list|length }}
+            </div>
+        </div>
 
-        <option value="Student">Student</option>
+    </div>
 
-    </select>
+    <!-- Toolbar -->
+    <div class="toolbar">
 
-    <br><br>
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Search username..."
+            onkeyup="searchUser()"
+        >
 
-    <button type="submit">
+        <button
+            type="button"
+            class="btn btn-primary"
+            onclick="openAddModal()"
+        >
+            + Add User
+        </button>
 
-        Add User
+    </div>
 
-    </button>
+    <!-- User Table -->
+    <div class="table-container">
 
-</form>
+        <table id="userTable">
 
-<hr>
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Created</th>
+                    <th width="220">Action</th>
+                </tr>
+            </thead>
 
-<h2>User List</h2>
+            <tbody>
 
-<table border="1">
+            {% for user in users %}
 
-<tr>
+                <tr>
 
-    <th>User ID</th>
+                    <td>{{ user.user_id }}</td>
 
-    <th>Username</th>
+                    <td>{{ user.username }}</td>
 
-    <th>Role</th>
+                    <td>
 
-    <th>Action</th>
+                        {% if user.role == "Admin" %}
+                            <span class="badge badge-admin">
+                                Admin
+                            </span>
 
-</tr>
+                        {% elif user.role == "AcademicStaff" %}
 
-{% for user in users %}
+                            <span class="badge badge-staff">
+                                Academic Staff
+                            </span>
 
-<tr>
+                        {% else %}
 
-    <td>{{ user.user_id }}</td>
+                            <span class="badge badge-student">
+                                Student
+                            </span>
 
-    <td>{{ user.username }}</td>
+                        {% endif %}
 
-    <td>{{ user.role }}</td>
+                    </td>
 
-    <td>
+                    <td>{{ user.created_at }}</td>
 
-        <a href="/admin/users/delete/{{ user.user_id }}">
-            Delete
-        </a>
+                    <td>
 
-    </td>
+                        <button
+                            type="button"
+                            class="btn btn-warning"
+                            onclick="openEditModal(
+                                '{{ user.user_id }}',
+                                '{{ user.username }}',
+                                '{{ user.role }}'
+                            )"
+                        >
+                            Edit
+                        </button>
 
-</tr>
+                        <form
+                            action="{{ url_for('admin.delete_user', user_id=user.user_id) }}"
+                            method="POST"
+                            style="display:inline;"
+                            onsubmit="return confirm('Delete this account?')"
+                        >
 
-{% endfor %}
+                            <button
+                                type="submit"
+                                class="btn btn-danger"
+                            >
+                                Delete
+                            </button>
 
-</table>
+                        </form>
 
-<a href="/logout">Logout</a>
+                    </td>
 
-</body>
-</html>
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<!-- Add User Modal -->
+<div id="addModal" class="modal">
+
+    <div class="modal-content">
+
+        <span class="close" onclick="closeAddModal()">&times;</span>
+
+        <h2>Add User</h2>
+
+        <form
+            action="{{ url_for('admin.add_user') }}"
+            method="POST"
+        >
+
+            <div class="form-group">
+                <label>User ID</label>
+                <input
+                    class="form-control"
+                    name="user_id"
+                    placeholder="U001"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label>Username</label>
+                <input
+                    class="form-control"
+                    name="username"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <input
+                    type="password"
+                    class="form-control"
+                    name="password"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label>Role</label>
+
+                <select
+                    class="form-control"
+                    name="role"
+                >
+                    <option value="Admin">Admin</option>
+                    <option value="AcademicStaff">Academic Staff</option>
+                    <option value="Student">Student</option>
+                </select>
+
+            </div>
+
+            <button
+                type="submit"
+                class="btn btn-success"
+            >
+                Create User
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<!-- Edit User Modal -->
+<div id="editModal" class="modal">
+
+    <div class="modal-content">
+
+        <span class="close" onclick="closeEditModal()">&times;</span>
+
+        <h2>Edit User</h2>
+
+        <form
+            id="editForm"
+            method="POST"
+        >
+
+            <div class="form-group">
+
+                <label>User ID</label>
+
+                <input
+                    id="edit_user_id"
+                    class="form-control"
+                    readonly
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label>Username</label>
+
+                <input
+                    id="edit_username"
+                    name="username"
+                    class="form-control"
+                    required
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label>Password</label>
+
+                <input
+                    id="edit_password"
+                    type="password"
+                    name="password"
+                    class="form-control"
+                    placeholder="Nhập mật khẩu mới"
+                    required
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label>Role</label>
+
+                <select
+                    id="edit_role"
+                    name="role"
+                    class="form-control"
+                >
+                    <option value="Admin">Admin</option>
+                    <option value="AcademicStaff">Academic Staff</option>
+                    <option value="Student">Student</option>
+                </select>
+
+            </div>
+
+            <button
+                type="submit"
+                class="btn btn-success"
+            >
+                Update User
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+
+function searchUser(){
+
+    let input=document.getElementById("searchInput").value.toUpperCase();
+
+    let table=document.getElementById("userTable");
+
+    let tr=table.getElementsByTagName("tr");
+
+    for(let i=1;i<tr.length;i++){
+
+        let td=tr[i].getElementsByTagName("td")[1];
+
+        if(td){
+
+            let txt=td.textContent||td.innerText;
+
+            tr[i].style.display=
+                txt.toUpperCase().indexOf(input)>-1
+                ? ""
+                : "none";
+
+        }
+
+    }
+
+}
+
+function openAddModal(){
+
+    document.getElementById("addModal").style.display="block";
+
+}
+
+function closeAddModal(){
+
+    document.getElementById("addModal").style.display="none";
+
+}
+
+window.onclick = function(event){
+
+    let addModal = document.getElementById("addModal");
+    let editModal = document.getElementById("editModal");
+
+    if(event.target == addModal){
+        addModal.style.display = "none";
+    }
+
+    if(event.target == editModal){
+        editModal.style.display = "none";
+    }
+
+}
+
+function openEditModal(userId, username, role){
+
+    document.getElementById("edit_user_id").value = userId;
+
+    document.getElementById("edit_username").value = username;
+
+    document.getElementById("edit_password").value = "";
+
+    document.getElementById("edit_role").value = role;
+
+    document.getElementById("editForm").action =
+        "/admin/users/update/" + userId;
+
+    document.getElementById("editModal").style.display = "block";
+
+}
+
+function closeEditModal(){
+
+    document.getElementById("editModal").style.display = "none";
+
+}
+</script>
+
+
+{% endblock %}

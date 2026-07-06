@@ -1,0 +1,258 @@
+{% extends "base/base_layout.html" %}
+
+{% block title %}Grades{% endblock %}
+
+{% block sidebar %}
+    {% include "staff/sidebar.html" %}
+{% endblock %}
+
+{% block page_title %}
+Grades
+{% endblock %}
+
+{% block content %}
+
+<div class="page">
+
+    <div class="page-title">
+        <h1>Grade Management</h1>
+        <p>Manage student grades</p>
+    </div>
+
+    <div class="toolbar">
+
+        <input
+            id="searchGrade"
+            type="text"
+            placeholder="Search student..."
+            onkeyup="searchGrade()">
+
+    </div>
+
+    <div class="table-container">
+
+        <table id="gradeTable">
+
+            <thead>
+
+                <tr>
+
+                    <th>Student</th>
+                    <th>Course</th>
+                    <th>Attendance</th>
+                    <th>Midterm</th>
+                    <th>Final</th>
+                    <th>Total</th>
+                    <th>Letter</th>
+                    <th>Action</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            {% for grade in grades %}
+
+                <tr>
+
+                    <td>{{ grade.student_name }}</td>
+
+                    <td>{{ grade.course_name }}</td>
+
+                    <td>{{ grade.attendance_score }}</td>
+
+                    <td>{{ grade.midterm_score }}</td>
+
+                    <td>{{ grade.final_score }}</td>
+
+                    <td>{{ grade.total_score }}</td>
+
+                    <td>
+
+                        <span class="badge badge-success">
+
+                            {{ grade.letter_grade }}
+
+                        </span>
+
+                    </td>
+
+                    <td>
+
+                        <button
+                            class="btn btn-warning"
+                            onclick="openGrade(
+                                '{{ grade.student_id }}',
+                                '{{ grade.course_id }}',
+                                '{{ grade.attendance_score }}',
+                                '{{ grade.midterm_score }}',
+                                '{{ grade.final_score }}'
+                            )">
+
+                            Edit
+
+                        </button>
+
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<!-- =======================
+     EDIT GRADE MODAL
+======================== -->
+
+<div id="gradeModal" class="modal">
+
+    <div class="modal-content">
+
+        <span
+            class="close"
+            onclick="document.getElementById('gradeModal').style.display='none'">
+
+            &times;
+
+        </span>
+
+        <h2>Edit Grade</h2>
+
+        <form
+            method="POST"
+            action="{{ url_for('grade.save_grade') }}">
+
+            <input
+                type="hidden"
+                id="student_id"
+                name="student_id">
+
+            <input
+                type="hidden"
+                id="course_id"
+                name="course_id">
+
+            <div class="form-group">
+
+                <label>Attendance</label>
+
+                <input
+                    id="attendance"
+                    name="attendance_score"
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="10"
+                    required>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>Midterm</label>
+
+                <input
+                    id="midterm"
+                    name="midterm_score"
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="10"
+                    required>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>Final</label>
+
+                <input
+                    id="final"
+                    name="final_score"
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="10"
+                    required>
+
+            </div>
+
+            <button
+                class="btn btn-primary">
+
+                Save
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+
+function openGrade(student, course, attendance, midterm, final){
+
+    document.getElementById("student_id").value = student;
+
+    document.getElementById("course_id").value = course;
+
+    document.getElementById("attendance").value = attendance;
+
+    document.getElementById("midterm").value = midterm;
+
+    document.getElementById("final").value = final;
+
+    document.getElementById("gradeModal").style.display = "block";
+
+}
+
+function searchGrade(){
+
+    let input = document.getElementById("searchGrade").value.toUpperCase();
+
+    let table = document.getElementById("gradeTable");
+
+    let tr = table.getElementsByTagName("tr");
+
+    for(let i=1;i<tr.length;i++){
+
+        let td = tr[i].getElementsByTagName("td")[0];
+
+        if(td){
+
+            tr[i].style.display =
+                td.innerHTML.toUpperCase().indexOf(input) > -1
+                ? ""
+                : "none";
+
+        }
+
+    }
+
+}
+
+window.onclick = function(event){
+
+    let modal = document.getElementById("gradeModal");
+
+    if(event.target == modal){
+
+        modal.style.display = "none";
+
+    }
+
+}
+
+</script>
+
+{% endblock %}

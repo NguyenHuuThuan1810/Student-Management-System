@@ -35,13 +35,22 @@ def view_enrollments():
 
     cursor.execute(query, (student_id,))
     enrollments = cursor.fetchall()
+    cursor.execute("""
+        SELECT
+            course_id,
+            course_name
+        FROM courses
+        ORDER BY course_name
+    """)
+    courses = cursor.fetchall()
 
     cursor.close()
     conn.close()
 
     return render_template(
-        "student/dashboard.html",
-        enrollments=enrollments
+        "student/enrollment.html",
+        enrollments=enrollments,
+        courses=courses
     )
 
 @enrollment_bp.route('/enroll/add', methods=['POST'])
@@ -57,10 +66,30 @@ def register_course():
         return redirect(url_for("auth.home"))
 
     course_id = request.form.get('course_id')
-    semester = request.form.get('semester', '2025-2026 HK2') # Mặc định học kỳ theo định dạng dữ liệu mẫu
+
+    if not course_id:
+        flash("Vui lòng chọn môn học.", "danger")
+        return redirect(url_for("enrollment.view_enrollments"))
+    semester = request.form.get('semester', '2025-2026 HK2').strip() # Mặc định học kỳ theo định dạng dữ liệu mẫu
+
+    if not semester:
+        flash("Học kỳ không hợp lệ.", "danger")
+        return redirect(url_for("enrollment.view_enrollments"))
     
     conn = get_connection()
     cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT course_id
+        FROM courses
+        WHERE course_id=%s
+        """, (course_id,))
+
+    if not cursor.fetchone():
+            flash("Môn học không tồn tại.", "danger")
+            cursor.close()
+            conn.close()
+            return redirect(url_for("enrollment.view_enrollments"))
 
     # Kiểm tra sinh viên đã đăng ký môn học này trong học kỳ chưa
     cursor.execute("""
@@ -137,8 +166,11 @@ def cancel_enrollment(enrollment_id):
             AND student_id = %s
         """
         cursor.execute(query, (enrollment_id, student_id))
-        conn.commit()
-        flash("Đã hủy đăng ký học phần thành công!", "success")
+        if cursor.rowcount == 0:
+            flash("Không tìm thấy học phần đã đăng ký.", "danger")
+        else:
+            conn.commit()
+            flash("Đã hủy đăng ký học phần thành công!", "success")
     except Exception as e:
         conn.rollback()
         flash(f"Không thể hủy đăng ký: {str(e)}", "danger")

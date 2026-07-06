@@ -32,7 +32,7 @@ def list_students():
     students = cursor.fetchall()
     cursor.close()
     conn.close()
-    return render_template('students/list.html', students=students, q=q)
+    return render_template('staff/student.html', students=students, q=q)
 
 # Add a new student
 @student_bp.route('/students/add', methods=['GET', 'POST'])
@@ -79,22 +79,22 @@ def add_student():
         # Kiểm tra các trường bắt buộc
         if not student_id or not user_id or not full_name or not gender or not dob:
             flash("Vui lòng điền đầy đủ các trường bắt buộc (*).", "danger")
-            return render_template("students/add.html", users=users, classes=classes)
+            return render_template("staff/student.html", users=users, classes=classes)
 
         # Student ID phải có dạng S001
         if not re.fullmatch(r"S\d{3}", student_id):
             flash("Student ID phải có định dạng S001.", "danger")
-            return render_template("students/add.html", users=users, classes=classes)
+            return render_template("staff/student.html", users=users, classes=classes)
 
         # Email (nếu có nhập)
         if email and not re.fullmatch(r"[^@]+@[^@]+\.[^@]+", email):
             flash("Email không đúng định dạng.", "danger")
-            return render_template("students/add.html", users=users, classes=classes)
+            return render_template("staff/student.html", users=users, classes=classes)
 
         # Phone (nếu có nhập)
         if phone and not re.fullmatch(r"\d{10}", phone):
             flash("Số điện thoại phải gồm đúng 10 chữ số.", "danger")
-            return render_template("students/add.html", users=users, classes=classes)
+            return render_template("staff/student.html", users=users, classes=classes)
                  
         # Kiểm tra Student ID
         cursor.execute(
@@ -151,7 +151,7 @@ def add_student():
             cursor.close()
             conn.close()
 
-    return render_template('students/add.html', users=users, classes=classes)
+    return render_template('staff/student.html', users=users, classes=classes)
 
 # View student details
 @student_bp.route('/students/<student_id>')
@@ -173,7 +173,7 @@ def view_student(student_id):
     return render_template('students/view.html', student=student)
 
 # Update student information
-@student_bp.route('/students/<student_id>/edit', methods=['GET', 'POST'])
+@student_bp.route('/students/update/<student_id>', methods=[ 'POST'])
 def edit_student(student_id):
 
     if session.get("role") != "AcademicStaff":
@@ -212,7 +212,7 @@ def edit_student(student_id):
         if not full_name or not gender or not dob:
             flash("Vui lòng điền đầy đủ các trường bắt buộc (*).", "danger")
             return render_template(
-                "students/edit.html",
+                "staff/student.html",
                 student=student,
                 classes=classes
             )
@@ -221,7 +221,7 @@ def edit_student(student_id):
         if email and not re.fullmatch(r"[^@]+@[^@]+\.[^@]+", email):
             flash("Email không đúng định dạng.", "danger")
             return render_template(
-                    "students/edit.html",
+                    "staff/student.html",
                     student=student,
                     classes=classes
                 )
@@ -230,7 +230,7 @@ def edit_student(student_id):
         if phone and not re.fullmatch(r"\d{10}", phone):
             flash("Số điện thoại phải gồm đúng 10 chữ số.", "danger")
             return render_template(
-                    "students/edit.html",
+                    "staff/student.html",
                     student=student,
                     classes=classes
                 )
@@ -246,7 +246,7 @@ def edit_student(student_id):
                 flash("Email đã tồn tại.", "danger")
                 cursor.close()
                 conn.close()
-                return render_template("students/edit.html", student=student, classes=classes)
+                return render_template("staff/student.html", student=student, classes=classes)
         # Kiểm tra số điện thoại  
         if phone:
             cursor.execute("""
@@ -275,7 +275,7 @@ def edit_student(student_id):
             """, (class_id, full_name, gender, dob, address, phone, email, department, student_id))
             conn.commit()
             flash(f'Cập nhật sinh viên {full_name} thành công!', 'success')
-            return redirect(url_for('student.view_student', student_id=student_id))
+            return redirect(url_for("student.list_students"))
         except Exception as e:
             conn.rollback()
             flash(f"Lỗi hệ thống: {str(e)}", "danger")
@@ -283,7 +283,7 @@ def edit_student(student_id):
             cursor.close()
             conn.close()
 
-    return render_template('students/edit.html', student=student, classes=classes)
+    return render_template('staff/student.html', student=student, classes=classes)
 
 # Delete a student
 @student_bp.route('/students/<student_id>/delete', methods=['POST'])

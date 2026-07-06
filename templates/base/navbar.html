@@ -1,0 +1,24 @@
+<header class="navbar">
+
+    <div class="navbar-left">
+
+        <h2>
+            {% block page_title %}
+                Dashboard
+            {% endblock %}
+        </h2>
+
+    </div>
+
+    <div class="navbar-right">
+
+        {% if session.get("username") %}
+            <span>
+                <i class="fa-solid fa-user"></i>
+                {{ session.get("username") }}
+            </span>
+        {% endif %}
+
+    </div>
+
+</header>

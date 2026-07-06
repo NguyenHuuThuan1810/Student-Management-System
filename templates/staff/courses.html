@@ -1,0 +1,303 @@
+{% extends "base/base_layout.html" %}
+
+{% block title %}Courses{% endblock %}
+
+{% block sidebar %}
+    {% include "staff/sidebar.html" %}
+{% endblock %}
+
+{% block page_title %}
+Course Management
+{% endblock %}
+
+{% block content %}
+
+<div class="page">
+
+    <div class="page-title">
+        <h1>Course Management</h1>
+        <p>Manage all available courses</p>
+    </div>
+
+    <div class="toolbar">
+
+        <input
+            type="text"
+            id="searchCourse"
+            placeholder="Search course..."
+            onkeyup="searchCourse()">
+
+        <button class="btn btn-primary"
+                onclick="document.getElementById('addCourseModal').style.display='block'">
+
+            + Add Course
+
+        </button>
+
+    </div>
+
+    <div class="table-container">
+
+        <table id="courseTable">
+
+            <thead>
+
+            <tr>
+
+                <th>ID</th>
+                <th>Course Name</th>
+                <th>Credits</th>
+                <th>Description</th>
+                <th>Action</th>
+
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+            {% for course in courses %}
+
+            <tr>
+
+                <td>{{ course.course_id }}</td>
+
+                <td>{{ course.course_name }}</td>
+
+                <td>{{ course.credits }}</td>
+
+                <td>{{ course.description }}</td>
+
+                <td>
+
+                    <button
+                        class="btn btn-warning"
+
+                        onclick="openEditCourse(
+                        '{{ course.course_id }}',
+                        '{{ course.course_name }}',
+                        '{{ course.credits }}',
+                        `{{ course.description }}`
+                        )">
+
+                        Edit
+
+                    </button>
+
+                    <form
+                        action="{{ url_for('course.delete_course', course_id=course.course_id) }}"
+                        method="POST"
+                        style="display:inline;">
+
+                        <button
+                            class="btn btn-danger"
+                            onclick="return confirm('Delete this course?')">
+
+                            Delete
+
+                        </button>
+
+                    </form>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<!-- ================= ADD COURSE ================= -->
+
+<div id="addCourseModal" class="modal">
+
+<div class="modal-content">
+
+<span class="close"
+onclick="document.getElementById('addCourseModal').style.display='none'">
+
+&times;
+
+</span>
+
+<h2>Add Course</h2>
+
+<form method="POST"
+      action="{{ url_for('course.add_course') }}">
+
+<div class="form-group">
+
+<label>Course ID</label>
+
+<input
+class="form-control"
+name="course_id"
+required>
+
+</div>
+
+<div class="form-group">
+
+<label>Course Name</label>
+
+<input
+class="form-control"
+name="course_name"
+required>
+
+</div>
+
+<div class="form-group">
+
+<label>Credits</label>
+
+<input
+class="form-control"
+type="number"
+name="credits"
+min="1"
+required>
+
+</div>
+
+<div class="form-group">
+
+<label>Description</label>
+
+<textarea
+class="form-control"
+name="description"></textarea>
+
+</div>
+
+<button class="btn btn-primary">
+
+Save
+
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+
+<!-- ================= EDIT COURSE ================= -->
+
+<div id="editCourseModal" class="modal">
+
+<div class="modal-content">
+
+<span class="close"
+onclick="document.getElementById('editCourseModal').style.display='none'">
+
+&times;
+
+</span>
+
+<h2>Edit Course</h2>
+
+<form
+id="editCourseForm"
+method="POST">
+
+<div class="form-group">
+
+<label>Course Name</label>
+
+<input
+class="form-control"
+id="edit_course_name"
+name="course_name"
+required>
+
+</div>
+
+<div class="form-group">
+
+<label>Credits</label>
+
+<input
+class="form-control"
+type="number"
+id="edit_credits"
+name="credits"
+min="1"
+required>
+
+</div>
+
+<div class="form-group">
+
+<label>Description</label>
+
+<textarea
+class="form-control"
+id="edit_description"
+name="description"></textarea>
+
+</div>
+
+<button class="btn btn-primary">
+
+Update
+
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+
+<script>
+
+function searchCourse(){
+
+let input=document.getElementById("searchCourse").value.toUpperCase();
+
+let table=document.getElementById("courseTable");
+
+let tr=table.getElementsByTagName("tr");
+
+for(let i=1;i<tr.length;i++){
+
+let td=tr[i].getElementsByTagName("td")[1];
+
+if(td){
+
+tr[i].style.display=
+td.innerHTML.toUpperCase().indexOf(input)>-1?"":"none";
+
+}
+
+}
+
+}
+
+
+function openEditCourse(id,name,credits,description){
+
+document.getElementById("editCourseForm").action =
+"/courses/" + id + "/edit";
+
+document.getElementById("edit_course_name").value=name;
+document.getElementById("edit_credits").value=credits;
+document.getElementById("edit_description").value=description;
+
+document.getElementById("editCourseModal").style.display="block";
+
+}
+
+</script>
+
+{% endblock %}

@@ -32,7 +32,7 @@ def list_courses():
     courses = cursor.fetchall()
     cursor.close()
     conn.close()
-    return render_template('courses/list.html', courses=courses, q=q)
+    return render_template("staff/courses.html", courses=courses)
 
 # Add a new course
 @course_bp.route('/courses/add', methods=['GET', 'POST'])
@@ -50,13 +50,13 @@ def add_course():
 
         if not course_id or not course_name or not credits_str:
             flash('Vui lòng điền đầy đủ các trường bắt buộc (*).', 'danger')
-            return render_template('courses/add.html')
+            return redirect(url_for("course.list_courses"))
         if not re.fullmatch(r"C\d{3}", course_id):
             flash("Course ID phải có định dạng C001.", "danger")
-            return render_template("courses/add.html")
+            return redirect(url_for("course.list_courses"))
         if len(course_name) > 100:
             flash("Tên môn học quá dài.", "danger")
-            return render_template("courses/add.html")
+            return redirect(url_for("course.list_courses"))
 
         try:
             credits = int(credits_str)
@@ -64,7 +64,7 @@ def add_course():
                 raise ValueError
         except ValueError:
             flash('Số tín chỉ phải nằm trong khoảng từ 1 đến 10.', 'danger')
-            return render_template('courses/add.html')
+            return redirect(url_for("course.list_courses"))
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
 
@@ -79,11 +79,10 @@ def add_course():
             cursor.close()
             conn.close()
             flash("Tên môn học đã tồn tại.", "danger")
-            return render_template("courses/add.html")
+            return redirect(url_for("course.list_courses"))
 
 
         # Kiểm tra Course ID đã tồn tại
-        cursor = conn.cursor(dictionary=True)
         cursor.execute(
             "SELECT course_id FROM courses WHERE course_id=%s",
             (course_id,)
@@ -93,7 +92,7 @@ def add_course():
             cursor.close()
             conn.close()
             flash("Course ID đã tồn tại.", "danger")
-            return render_template("courses/add.html")
+            return redirect(url_for("course.list_courses"))
 
         conn = get_connection()
         cursor = conn.cursor()
@@ -112,7 +111,7 @@ def add_course():
             cursor.close()
             conn.close()
 
-    return render_template('courses/add.html')
+    return redirect(url_for("course.list_courses"))
 
 # View course details
 @course_bp.route('/courses/<course_id>')
@@ -134,7 +133,7 @@ def view_course(course_id):
     return render_template('courses/view.html', course=course)
 
 # Update course information
-@course_bp.route('/courses/<course_id>/edit', methods=['GET', 'POST'])
+@course_bp.route('/courses/<course_id>/edit', methods=[ 'POST'])
 def edit_course(course_id):
 
     if session.get("role") != "AcademicStaff":
@@ -159,13 +158,10 @@ def edit_course(course_id):
 
         if not course_name or not credits_str:
             flash('Vui lòng điền đầy đủ các trường bắt buộc (*).', 'danger')
-            return render_template('courses/edit.html', course=course)
+            return redirect(url_for("course.list_courses"))
         if len(course_name) > 100:
             flash("Tên môn học quá dài.", "danger")
-            return render_template(
-                "courses/edit.html",
-                course=course
-            )
+            return redirect(url_for("course.list_courses"))
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
 
@@ -180,10 +176,7 @@ def edit_course(course_id):
             cursor.close()
             conn.close()
             flash("Tên môn học đã tồn tại.", "danger")
-            return render_template(
-                "courses/edit.html",
-                course=course
-            )
+            return redirect(url_for("course.list_courses"))
 
         try:
             credits = int(credits_str)
@@ -191,7 +184,7 @@ def edit_course(course_id):
                 raise ValueError
         except ValueError:
             flash('Số tín chỉ phải nằm trong khoảng từ 1 đến 10.', 'danger')
-            return render_template('courses/edit.html', course=course)
+            return redirect(url_for("course.list_courses"))
 
 
         cursor = conn.cursor()
@@ -203,7 +196,7 @@ def edit_course(course_id):
             """, (course_name, credits, description, course_id))
             conn.commit()
             flash(f'Cập nhật môn học "{course_name}" thành công!', 'success')
-            return redirect(url_for('course.view_course', course_id=course_id))
+            return redirect(url_for("course.list_courses"))
         except Exception as e:
             conn.rollback()
             flash(f"Lỗi hệ thống: {str(e)}", "danger")
@@ -211,7 +204,7 @@ def edit_course(course_id):
             cursor.close()
             conn.close()
 
-    return render_template('courses/edit.html', course=course)
+    return redirect(url_for("course.list_courses"))
 
 # Delete a course
 @course_bp.route('/courses/<course_id>/delete', methods=['POST'])

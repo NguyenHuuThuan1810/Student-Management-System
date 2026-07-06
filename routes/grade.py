@@ -22,32 +22,81 @@ def process_grading(attendance, midterm, final):
     else: letter = 'F'
     return round(total, 2), letter
 
-# Display grade list
+# Display grade list (Dành cho cả Staff quản lý và Student xem điểm của mình)
 @grade_bp.route('/grades')
 def view_grades():
+    user_role = session.get("role")
+    
+    # Chặn nếu người dùng chưa đăng nhập hoặc không đúng quyền
+    if user_role not in ["AcademicStaff", "Student"]:
+        flash("Bạn không có quyền thực hiện chức năng này.", "danger")
+        return redirect(url_for("auth.home"))
+    
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     
-    # Đồng bộ chính xác tên bảng và cột theo schema mới
-    query = """
-        SELECT g.grade_id, s.full_name AS student_name, c.course_name, 
-               g.attendance_score, g.midterm_score, g.final_score, g.total_score, g.letter_grade
-        FROM grades g
-        JOIN students s ON g.student_id = s.student_id
-        JOIN courses c ON g.course_id = c.course_id
-    """
-    cursor.execute(query)
-    grades = cursor.fetchall()
-    
-    cursor.close()
-    conn.close()
-    return render_template('staff/dashboard.html', grades=grades)
+    if user_role == "AcademicStaff":
+        # 1. Logic dành cho STAFF: Xem TẤT CẢ các điểm số của mọi sinh viên
+        query = """
+            SELECT
+                    g.grade_id,
+                    g.student_id,
+                    g.course_id,
+                    s.full_name AS student_name,
+                    c.course_name,
+                    g.attendance_score,
+                    g.midterm_score,
+                    g.final_score,
+                    g.total_score,
+                    g.letter_grade
+                FROM grades g
+                JOIN students s
+                ON g.student_id=s.student_id
+                JOIN courses c
+                ON g.course_id=c.course_id
+                ORDER BY s.full_name
+        """
+        cursor.execute(query)
+        grades = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return render_template('staff/grades.html', grades=grades)
+        
+    elif user_role == "Student":
+        # 2. Logic dành cho STUDENT: Chỉ lọc ra điểm của đúng mã sinh viên đang đăng nhập
+        student_id = session.get("student_id")
+        if not student_id:
+            flash("Không tìm thấy thông tin phiên đăng nhập sinh viên.", "danger")
+            return redirect(url_for("auth.home"))
+            
+        query = """
+            SELECT g.grade_id, c.course_name, 
+                   g.attendance_score, g.midterm_score, g.final_score, g.total_score, g.letter_grade
+            FROM grades g
+            JOIN courses c ON g.course_id = c.course_id
+            WHERE g.student_id = %s
+        """
+        cursor.execute(query, (student_id,))
+        student_grades = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        
+        # Trả về giao diện bảng điểm riêng của sinh viên
+        return render_template('student/grades.html', grades=student_grades)
 
 # Save or update grade
 @grade_bp.route('/grade/save', methods=['POST'])
 def save_grade():
+    if session.get("role") != "AcademicStaff":
+        flash("Bạn không có quyền thực hiện chức năng này.", "danger")
+        return redirect(url_for("auth.home"))
+    
     student_id = request.form.get('student_id')
     course_id = request.form.get('course_id')
+    if not student_id or not course_id:
+        flash("Thiếu thông tin sinh viên hoặc môn học.", "danger")
+        return redirect(url_for("grade.view_grades"))
+    
     try:
         attendance_score = float(request.form.get('attendance_score', 0))
         midterm_score = float(request.form.get('midterm_score', 0))
@@ -73,7 +122,33 @@ def save_grade():
     total_score, letter_grade = process_grading(attendance_score, midterm_score, final_score)
     
     conn = get_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
+
+    # Kiểm tra Student tồn tại
+    cursor.execute("""
+        SELECT student_id
+        FROM students
+        WHERE student_id = %s
+    """, (student_id,))
+
+    if not cursor.fetchone():
+        flash("Sinh viên không tồn tại.", "danger")
+        cursor.close()
+        conn.close()
+        return redirect(url_for("grade.view_grades"))
+
+    # Kiểm tra Course tồn tại
+    cursor.execute("""
+        SELECT course_id
+        FROM courses
+        WHERE course_id = %s
+    """, (course_id,))
+
+    if not cursor.fetchone():
+        flash("Môn học không tồn tại.", "danger")
+        cursor.close()
+        conn.close()
+        return redirect(url_for("grade.view_grades"))
 
     # Kiểm tra sinh viên đã đăng ký môn học chưa
     cursor.execute("""
