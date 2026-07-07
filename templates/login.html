@@ -2,59 +2,127 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Management System | Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
 </head>
 <body>
-<div class="login-wrapper">
-    <!-- Panel bên trái -->
-    <div class="login-left">
-        <h5>HỆ THỐNG QUẢN LÝ HỌC SINH</h5>
-        <h1>Quản lý lớp học thông minh, hiệu quả hơn.</h1>
 
-        <div class="stats">
-            <div class="stat-box">
-                <h3>1.248</h3>
-                <p>HỌC SINH</p>
+<div class="login-container">
+    <!-- PANEL BÊN TRÁI -->
+    <div class="login-left">
+        <!-- Nền mạng nơ ron (Neural Network) -->
+        <div class="network-bg">
+            <div class="network-lines"></div>
+            <div class="network-glow"></div>
+            <div class="particles"></div>
+        </div>
+        
+        <!-- 1. Logo (Nằm trên cùng) -->
+        <div class="brand-wrapper">
+            <i class="fa-solid fa-book-open-reader brand-logo"></i>
+            <div class="brand-text">
+                <span class="brand-title">STUDENT MANAGEMENT</span>
+                <span class="brand-subtitle">HỆ THỐNG QUẢN LÝ HỌC SINH</span>
             </div>
-            <div class="stat-box">
-                <h3>34</h3>
-                <p>KHÓA HỌC</p>
+        </div>
+
+        <!-- 2. Nội dung chính & Thống kê  -->
+        <div class="left-main-content">
+            <h1>STUDENT MANAGEMENT</h1>
+            <p class="slogan">Smarter, more efficient classroom management..</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>1.248</h3>
+                    <p>STUDENT</p>
+                </div>
+                <div class="stat-card">
+                    <h3>34</h3>
+                    <p>COURSE</p>
+                </div>
+                <div class="stat-card">
+                    <h3>98%</h3>
+                    <p>TRUSTED TO USE</p>
+                </div>
+                <div class="stat-card">
+                    <h3>62</h3>
+                    <p>TEACHER</p>
+                </div>
             </div>
-            <div class="stat-box">
-                <h3>78%</h3>
-                <p>HOÀN THÀNH TB</p>
-            </div>
-            <div class="stat-box">
-                <h3>62</h3>
-                <p>GIÁO VIÊN</p>
-            </div>
+        </div>
+
+        <!-- 3. Các ô tính năng  -->
+        <div class="features-wrapper">
+            <div class="feature-pill"><i class="fa-solid fa-bolt"></i> Super fast access speed</div>
+            <div class="feature-pill"><i class="fa-solid fa-cloud"></i> 2TB storage space</div>
+            <div class="feature-pill"><i class="fa-solid fa-shield-halved"></i> Multi-layered data security</div>
+            <div class="feature-pill"><i class="fa-solid fa-gift"></i> Completely free to use.</div>
         </div>
     </div>
 
-    <!-- Panel bên phải -->
+    <!-- PANEL BÊN PHẢI -->
     <div class="login-right">
-        <h2>Chào mừng trở lại</h2>
-        <p>Đăng nhập vào tài khoản của bạn</p>
-        {% include "base/flash_messages.html" %}
-
-        <form method="POST" action="{{ url_for('auth.login_route') }}">
-            <label for="username">Tên đăng nhập</label>
-            <input type="text" id="username" name="username" placeholder="Nhập tên đăng nhập" autocomplete="username" required>
-
-            <label for="password">Mật khẩu</label>
-            <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
-
-            <div class="options">
-                <a href="#">Quên mật khẩu?</a>
-                <label><input type="checkbox" name="remember"> Ghi nhớ đăng nhập</label>
+        <div class="form-wrapper">
+            <h2>Welcome back!</h2>
+            <p class="form-subtitle">Log in to your account.</p>
+            
+            <!-- Vùng hiển thị lỗi đăng nhập -->
+            <div id="alert-container">
+                {% include "base/flash_messages.html" %}
             </div>
 
-            <button type="submit">Đăng nhập</button>
-        </form>
+            <form method="POST" action="{{ url_for('auth.login_route') }}">
+                <div class="input-field-group">
+                    <label for="username">Username</label>
+                    <div class="input-icon-box">
+                        <i class="fa-regular fa-user"></i>
+                        <input type="text" id="username" name="username" placeholder="Enter your username" autocomplete="username" required>
+                    </div>
+                </div>
 
-        <p class="footer">Chưa có tài khoản? <a href="#">Liên hệ quản trị viên</a></p>
+                <div class="input-field-group">
+                    <label for="password">Mật khẩu</label>
+                    <div class="input-icon-box">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
+                    </div>
+                </div>
+
+                <div class="form-options">
+                    <a href="#" class="forgot-pass">Forgot your password?</a>
+                </div>
+
+                <button type="submit" class="btn-submit">Log in</button>
+            </form>
+
+            <p class="footer-text">Don't have an account yet?<a href="#">Contact administrator</a></p>
+        </div>
     </div>
 </div>
+
+<!-- Script tự động mờ và ẩn thông báo lỗi -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tìm các thẻ thông báo lỗi bên trong file flash_messages của bạn
+        const alertBox = document.getElementById('alert-container');
+        
+        // Nếu bên trong alert-container có nội dung (có lỗi xuất hiện)
+        if (alertBox && alertBox.innerText.trim() !== '') {
+            // Hiển thị 0.9 giây, sau đó bắt đầu hiệu ứng tan biến
+            setTimeout(function() {
+                alertBox.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                alertBox.style.opacity = '0';
+                alertBox.style.transform = 'translateY(-10px)';
+                
+                // Gỡ hoàn toàn khỏi HTML sau khi mờ xong
+                setTimeout(() => alertBox.remove(), 600);
+            }, 900); 
+        }
+    });
+</script>
+
 </body>
 </html>

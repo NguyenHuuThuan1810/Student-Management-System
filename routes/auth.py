@@ -45,7 +45,7 @@ def login_route():
     user = login(username, password)
 
     if not user:
-        flash("Sai tên đăng nhập hoặc mật khẩu.", "danger")
+        flash("Invalid Username or Password", "danger")
         return redirect(url_for("auth.home"))
 
     session["user_id"] = user["user_id"]

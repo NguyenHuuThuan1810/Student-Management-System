@@ -1,4 +1,7 @@
 venv/
 .vscode/
 __pycache__/
+sms/
 *.pycmysql/ 
+# Docker data (QUAN TRỌNG: Không push dữ liệu DB lên)
+.docker/

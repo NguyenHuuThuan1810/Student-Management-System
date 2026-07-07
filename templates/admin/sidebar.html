@@ -1,22 +1,25 @@
-<div class="sidebar-header">
-    <h2>SMS</h2>
-    <p>Administrator</p>
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h2>STUDENT MANAGEMENT</h2>
+        <h2 class="sub-title">HỆ THỐNG QUẢN LÝ HỌC SINH</h2>
+        <p>Administrator</p>
+    </div>
+
+    <ul class="menu">
+        <li class="active">
+            <a href="{{ url_for('admin.dashboard') }}">
+                
+                Dashboard
+            </a>
+        </li>
+    </ul>
+
+    <ul class="menu-bottom">
+        <li>
+            <a href="{{ url_for('auth.logout') }}">
+                
+                Logout
+            </a>
+        </li>
+    </ul>
 </div>
-
-<ul class="menu">
-
-    <li>
-        <a href="{{ url_for('admin.dashboard') }}">
-            <span>🏠</span>
-            Dashboard
-        </a>
-    </li>
-
-    <li>
-        <a href="{{ url_for('auth.logout') }}">
-            <span>🚪</span>
-            Logout
-        </a>
-    </li>
-
-</ul>

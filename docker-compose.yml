@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  # 1. Dịch vụ Cơ sở dữ liệu MySQL
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: '123456'  
+      MYSQL_DATABASE: student_management       # Tự động tạo DB khi khởi chạy lần đầu
+    ports:
+      - "3307:3306"                            # Ánh xạ cổng ra máy thật để bạn vẫn dùng được Command Client
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # --- DÒNG ĐỒNG BỘ QUAN TRỌNG MỚI THÊM ---
+      - ./sql/student_management_full.sql:/docker-entrypoint-initdb.d/student_management_full.sql
+
+  # 2. Dịch vụ Ứng dụng Flask Web
+  web:
+    build: .                                   # Build từ Dockerfile ở thư mục hiện tại
+    container_name: flask_web_app
+    restart: always
+    ports:
+      - "5000:5000"                            # Ánh xạ cổng 5000 ra ngoài trình duyệt
+    environment:
+      - FLASK_ENV=production
+    depends_on:
+      - db                                     # Chờ container 'db' khởi động trước rồi mới chạy 'web'
+
+volumes:
+  mysql_data:                                  # Khai báo volume lưu trữ dữ liệu MySQL
