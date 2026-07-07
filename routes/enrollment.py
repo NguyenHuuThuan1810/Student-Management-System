@@ -36,12 +36,19 @@ def view_enrollments():
     cursor.execute(query, (student_id,))
     enrollments = cursor.fetchall()
     cursor.execute("""
-        SELECT
+    SELECT
             course_id,
             course_name
         FROM courses
+        WHERE course_id NOT IN (
+            SELECT course_id
+            FROM enrollments
+            WHERE student_id = %s
+            AND semester = '2025-2026 HK2'
+        )
         ORDER BY course_name
-    """)
+    """, (student_id,))
+
     courses = cursor.fetchall()
 
     cursor.close()

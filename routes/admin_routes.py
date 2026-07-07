@@ -172,7 +172,12 @@ def update_user(user_id):
         conn.close()
         flash("Username đã tồn tại.", "danger")
         return redirect(url_for("admin.dashboard"))
-
+    
+    if user_id == session.get("user_id") and role != "Admin":
+        flash("Bạn không thể thay đổi vai trò của chính mình.", "warning")
+        return redirect(url_for("admin.dashboard"))
+    
+    
     try:
 
         cursor.execute("""
@@ -231,6 +236,10 @@ def delete_user(user_id):
             WHERE user_id = %s
         """, (user_id,))
 
+        if cursor.rowcount == 0:
+            flash("Không tìm thấy tài khoản.", "warning")
+            return redirect(url_for("admin.dashboard"))
+        
         conn.commit()
 
         flash("Xóa tài khoản thành công.", "success")

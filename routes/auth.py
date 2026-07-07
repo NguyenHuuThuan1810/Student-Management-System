@@ -45,7 +45,7 @@ def login_route():
     user = login(username, password)
 
     if not user:
-        flash("Sai tên đăng nhập hoặc mật khẩu.", "danger")
+        flash("Invalid Username or Password", "danger")
         return redirect(url_for("auth.home"))
 
     session["user_id"] = user["user_id"]
@@ -70,8 +70,20 @@ def login_route():
         cursor.close()
         conn.close()
 
-        if staff:
-            session["staff_id"] = staff["staff_id"]
+        if not staff:
+        # Xóa session vừa tạo khi đăng nhập
+            session.pop("user_id", None)
+            session.pop("role", None)
+            session.pop("staff_id", None)
+
+            flash(
+                "Tài khoản Staff chưa được khởi tạo.",
+                "warning"
+            )
+
+            return redirect(url_for("auth.home"))
+        
+        session["staff_id"] = staff["staff_id"]
 
         return redirect("/staff/dashboard")
 
@@ -90,9 +102,21 @@ def login_route():
 
         cursor.close()
         conn.close()
+        if not student:
+    # Xóa session vừa tạo khi đăng nhập
+            session.pop("user_id", None)
+            session.pop("role", None)
+            session.pop("student_id", None)
 
-        if student:
-            session["student_id"] = student["student_id"]
+            flash(
+                "Tài khoản chưa được cấp thông tin sinh viên. Vui lòng liên hệ Academic Staff.",
+                "warning"
+            )
+
+            return redirect(url_for("auth.home"))
+
+        
+        session["student_id"] = student["student_id"]
 
         return redirect("/student/dashboard")
     

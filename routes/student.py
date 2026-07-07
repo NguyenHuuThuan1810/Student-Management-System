@@ -12,27 +12,77 @@ student_bp = Blueprint('student', __name__)
 # Display all students and search
 @student_bp.route('/students')
 def list_students():
+    print("===== LIST STUDENTS =====") 
 
     if session.get("role") != "AcademicStaff":
         flash("Bạn không có quyền thực hiện chức năng này.", "danger")
         return redirect(url_for("auth.home"))
-    
-    q = request.args.get('q', '').strip()
+
+    q = request.args.get("q", "").strip()
+
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
+
+    # Student list
     if q:
         cursor.execute("""
-            SELECT student_id, class_id, user_id, full_name, gender, date_of_birth, address, phone, email, department FROM students
-            WHERE student_id LIKE %s OR full_name LIKE %s
-               OR email LIKE %s OR department LIKE %s OR phone LIKE %s
+            SELECT student_id, class_id, user_id,
+                   full_name, gender,
+                   date_of_birth, address,
+                   phone, email, department
+            FROM students
+            WHERE student_id LIKE %s
+               OR full_name LIKE %s
+               OR email LIKE %s
+               OR department LIKE %s
+               OR phone LIKE %s
             ORDER BY student_id
-        """, (f'%{q}%', f'%{q}%', f'%{q}%', f'%{q}%', f'%{q}%'))
+        """, (f"%{q}%", f"%{q}%", f"%{q}%", f"%{q}%", f"%{q}%"))
     else:
-        cursor.execute("SELECT student_id, class_id, user_id, full_name, gender, date_of_birth, address, phone, email, department FROM students ORDER BY student_id")
+        cursor.execute("""
+            SELECT student_id, class_id, user_id,
+                   full_name, gender,
+                   date_of_birth, address,
+                   phone, email, department
+            FROM students
+            ORDER BY student_id
+        """)
+
     students = cursor.fetchall()
+
+    # Account chưa có thông tin Student
+    cursor.execute("""
+        SELECT user_id, username
+        FROM users
+        WHERE role='Student'
+        AND user_id NOT IN (
+            SELECT user_id
+            FROM students
+        )
+        ORDER BY user_id
+    """)
+
+    users = cursor.fetchall()
+
+    # Class list
+    cursor.execute("""
+        SELECT class_id, class_name
+        FROM class_sections
+        ORDER BY class_name
+    """)
+
+    classes = cursor.fetchall()
+
     cursor.close()
     conn.close()
-    return render_template('staff/student.html', students=students, q=q)
+
+    return render_template(
+        "staff/student.html",
+        students=students,
+        users=users,
+        classes=classes,
+        q=q
+    )
 
 # Add a new student
 @student_bp.route('/students/add', methods=['GET', 'POST'])
@@ -56,7 +106,7 @@ def add_student():
             ORDER BY user_id
         """)
     users = cursor.fetchall()
-
+    print("Available student accounts:", users)
     # Load available class_sections
     cursor.execute("""
             SELECT class_id, class_name
@@ -81,9 +131,9 @@ def add_student():
             flash("Vui lòng điền đầy đủ các trường bắt buộc (*).", "danger")
             return render_template("staff/student.html", users=users, classes=classes)
 
-        # Student ID phải có dạng S001
-        if not re.fullmatch(r"S\d{3}", student_id):
-            flash("Student ID phải có định dạng S001.", "danger")
+        # Student ID phải có dạng ST001
+        if not re.fullmatch(r"ST\d{3}", student_id):
+            flash("Student ID phải có định dạng ST001.", "danger")
             return render_template("staff/student.html", users=users, classes=classes)
 
         # Email (nếu có nhập)
@@ -198,6 +248,8 @@ def edit_student(student_id):
         return redirect(url_for('student.list_students'))
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
+    student = None
+    
     if request.method == 'POST':
         class_id = request.form.get('class_id', '').strip() or None
         full_name  = request.form.get('full_name', '').strip()
@@ -211,29 +263,23 @@ def edit_student(student_id):
         # Kiểm tra các trường bắt buộc
         if not full_name or not gender or not dob:
             flash("Vui lòng điền đầy đủ các trường bắt buộc (*).", "danger")
-            return render_template(
-                "staff/student.html",
-                student=student,
-                classes=classes
-            )
+            cursor.close()
+            conn.close()
+            return redirect(url_for("student.list_students"))
 
         # Email (nếu có nhập)
         if email and not re.fullmatch(r"[^@]+@[^@]+\.[^@]+", email):
             flash("Email không đúng định dạng.", "danger")
-            return render_template(
-                    "staff/student.html",
-                    student=student,
-                    classes=classes
-                )
+            cursor.close()
+            conn.close()
+            return redirect(url_for("student.list_students"))
 
         # Phone (nếu có nhập)
         if phone and not re.fullmatch(r"\d{10}", phone):
             flash("Số điện thoại phải gồm đúng 10 chữ số.", "danger")
-            return render_template(
-                    "staff/student.html",
-                    student=student,
-                    classes=classes
-                )
+            cursor.close()
+            conn.close()
+            return redirect(url_for("student.list_students"))
 
         # Kiểm tra Email
         if email:
@@ -246,7 +292,7 @@ def edit_student(student_id):
                 flash("Email đã tồn tại.", "danger")
                 cursor.close()
                 conn.close()
-                return render_template("staff/student.html", student=student, classes=classes)
+                return redirect(url_for("student.list_students"))
         # Kiểm tra số điện thoại  
         if phone:
             cursor.execute("""
@@ -259,11 +305,7 @@ def edit_student(student_id):
                 flash("Số điện thoại đã tồn tại.", "danger")
                 cursor.close()
                 conn.close()
-                return render_template(
-                    "students/edit.html",
-                    student=student,
-                    classes=classes
-                )
+                return redirect(url_for("student.list_students"))
 
         cursor = conn.cursor()
         try:

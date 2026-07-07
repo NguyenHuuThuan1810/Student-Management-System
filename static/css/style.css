@@ -32,36 +32,115 @@ body{
 /* =====================================================
    SIDEBAR
 ===================================================== */
-.sidebar{
-    width:250px;
-    background:#1e293b;
-    color:#fff;
-    display:flex;
-    flex-direction:column;
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: #2c3e50;
+    color: white;
+    width: 250px;
+    position: fixed;
+    left: 0;
+    top: 0;
 }
 
-
-.menu{
-    list-style:none;
-    padding:15px 0;
-    flex:1;
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid #34495e;
+    text-align: center;
 }
 
-.menu li{
-    margin-bottom:5px;
+.sidebar-header h2 {
+    font-size: 16px;
+    margin: 0;
+    line-height: 1.4;
 }
 
-.menu a{
-    display:block;
-    color:white;
-    text-decoration:none;
-    padding:14px 24px;
-    transition:.25s;
+.sidebar-header .sub-title {
+    font-size: 14px;
+    opacity: 0.8;
 }
 
-.menu a:hover,
-.menu a.active{
-    background:#2563eb;
+.sidebar-header p {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-top: 5px;
+}
+
+.menu {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0 0;
+    flex: 1;
+}
+
+.menu li {
+    padding: 0 15px;
+    margin: 5px 0;
+}
+
+.menu li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    color: #bdc3c7;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.menu li a:hover {
+    background: #34495e;
+    color: white;
+}
+
+/* Style cho item đang active (Dashboard) */
+.menu li.active a {
+    background: #3498db;
+    color: white;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+.menu li.active a:hover {
+    background: #2980b9;
+}
+
+.menu li a span {
+    font-size: 20px;
+}
+
+/* Menu bottom - Logout */
+.menu-bottom {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-top: 1px solid #34495e;
+    padding: 10px 15px;
+}
+
+.menu-bottom li {
+    margin: 0;
+}
+
+.menu-bottom li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    color: #e74c3c;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.menu-bottom li a:hover {
+    background: #34495e;
+    color: #ff6b6b;
+}
+
+.menu-bottom li a span {
+    font-size: 20px;
 }
 
 .logout{
@@ -556,4 +635,19 @@ textarea.form-control{
 .info-table tr:last-child th,
 .info-table tr:last-child td{
     border-bottom:none;
+}
+/* Nếu đang dùng Bootstrap, chỉ cần thêm */
+.sidebar {
+    width: 260px !important;
+}
+
+.main-content {
+    margin-left: 260px !important;
+    padding: 20px !important;
+}
+
+/* Đảm bảo container không bị tràn */
+.container-fluid {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
 }
